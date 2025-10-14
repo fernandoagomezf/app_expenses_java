@@ -5,10 +5,6 @@ import java.util.UUID;
 
 public record Identifier(UUID value) {
     public Identifier {
-        ensure();
-    }
-
-    public void ensure() {
         if (value == null) {
             throw new IllegalArgumentException("Identifier value cannot be null");
         }
