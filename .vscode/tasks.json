@@ -1,0 +1,79 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Clean Directories",
+            "type":"shell",
+            "command":"rmdir",
+            "args": [
+            "/s", 
+            "/q", 
+            "build"
+            ],
+            "windows": {
+            "command": "cmd",
+            "args": ["/c", "if exist build rmdir /s /q build"]
+            },
+        }, 
+        {
+            "label": "Compile Module",
+            "type": "shell",
+            "command":"javac",
+            "args": [
+                "--module-source-path", "src",
+                "-d", "build/classes", 
+                "--module", "pet",
+                "-proc:none"
+            ],
+            "group": "build",
+            "presentation":{
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "showReuseMessage": true,
+                "clear": true   
+            }
+        },
+        {
+            "label": "Package Module",
+            "type":"shell",
+            "command":"jar",
+            "args": [
+                "--create",
+                "--file", "build/jars/pet.jar",
+                "-C", "build/classes/pet", "."
+            ],
+            "group":"build",
+            "presentation":{
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "showReuseMessage": true,
+                "clear": false   
+            }
+        }, 
+        {
+            "label": "Build Solution",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Clean Directories",
+                "Compile Module",
+                "Package Module",
+            ],
+            "group": {
+                "kind":"build",
+                "isDefault": true
+            }, 
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        }
+    ]
+}
