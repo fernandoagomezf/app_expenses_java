@@ -52,4 +52,10 @@ public abstract class BudgetTransaction {
         _amount = amount;
         _updatedAt = Instant.now();
     }
+
+    protected abstract int sign();
+
+    public Money signedAmount() {
+        return _amount.scale(sign());
+    }
 }

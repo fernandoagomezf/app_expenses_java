@@ -14,6 +14,10 @@ public final class Income extends BudgetTransaction {
         _category = IncomeCategory.OTHER;
     }
 
+    protected int sign() {
+        return 1;
+    }
+
     public IncomeCategory category() {
         return _category;
     }
@@ -25,4 +29,5 @@ public final class Income extends BudgetTransaction {
         _category = category;
         update(amount);
     }
+    
 }

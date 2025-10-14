@@ -15,6 +15,10 @@ public final class Expense extends BudgetTransaction {
         _category = ExpenseCategory.OTHER;
     }
 
+    protected int sign() {
+        return 1;
+    }
+
     public ExpenseCategory category() {
         return _category;
     }
