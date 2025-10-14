@@ -23,7 +23,8 @@
                 "--module-source-path", "src",
                 "-d", "build/classes", 
                 "--module", "pet",
-                "-proc:none"
+                "-proc:none",
+                "-Xlint:deprecation"
             ],
             "group": "build",
             "presentation":{
