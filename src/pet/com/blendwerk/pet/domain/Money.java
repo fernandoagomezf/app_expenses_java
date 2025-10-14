@@ -1,0 +1,91 @@
+package com.blendwerk.pet.domain;
+
+import java.lang.IllegalArgumentException;
+import java.lang.NumberFormatException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import com.blendwerk.pet.domain.Currency;
+
+public record Money(BigDecimal amount, Currency currency) {
+    public static final int INTERNAL_SCALE = 8;
+    public static final int DISPLAY_SCALE = 2;
+
+    public Money {
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency cannot be null");
+        }
+        if (amount.scale() != INTERNAL_SCALE) {
+            amount = amount.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
+        }
+    }
+
+    
+    public Money add(Money other) {
+        if (!currency.equals(other.currency)) {
+            throw new IllegalArgumentException("Cannot add different currencies");
+        }
+        var newAmount = amount.add(other.amount);
+        return new Money(newAmount, currency);
+    }
+
+    public Money substract(Money other) {
+        if (!currency.equals(other.currency)) {
+            throw new IllegalArgumentException("Cannot subtract different currencies");
+        }
+
+        var newAmount = amount.subtract(other.amount);
+        return new Money(newAmount, currency);
+    }
+
+    public Money scale(BigDecimal factor) {
+        if (factor == null) {
+            throw new IllegalArgumentException("Scale factor cannot be null");
+        }
+
+        var newAmount = amount.multiply(factor);
+        return new Money(newAmount, this.currency);
+    }
+
+    public String toString() {
+        var displayAmount = amount.setScale(DISPLAY_SCALE, RoundingMode.HALF_UP);
+        return String.format("%s %s", currency, displayAmount.toPlainString());
+    }
+
+    public static Money zero(Currency currency) {
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency cannot be null");
+        }
+        
+        return new Money(BigDecimal.ZERO, currency);
+    }
+
+    public static Money of(String amount, Currency currency) {
+        if (amount == null || amount.isBlank()) {
+            throw new IllegalArgumentException("Amount cannot be null or blank");
+        }
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency cannot be null");
+        }
+
+        Money result;
+        try {
+            var value = new BigDecimal(amount);
+            result = new Money(value, currency);
+        } catch (NumberFormatException e) {
+            result = zero(currency);
+        }
+
+        return result;
+    }
+
+    public static Money of(double amount, Currency currency) {
+        var str = Double.toString(amount);
+        return of(str, currency);
+    }
+
+    public static Money of(long amount, Currency currency) {
+        var str = Long.toString(amount);
+        return of(str, currency);
+    }
+}
