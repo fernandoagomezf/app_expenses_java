@@ -5,6 +5,8 @@ import java.lang.NumberFormatException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 import com.blendwerk.pet.domain.Currency;
 
 public record Money(BigDecimal amount, Currency currency) {
@@ -19,7 +21,6 @@ public record Money(BigDecimal amount, Currency currency) {
             amount = amount.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
         }
     }
-
     
     public Money add(Money other) {
         if (!currency.equals(other.currency)) {
@@ -49,7 +50,13 @@ public record Money(BigDecimal amount, Currency currency) {
 
     public String toString() {
         var displayAmount = amount.setScale(DISPLAY_SCALE, RoundingMode.HALF_UP);
-        return String.format("%s %s", currency, displayAmount.toPlainString());
+
+        var locale = switch (currency) {
+            case MXN -> Locale.forLanguageTag("es-MX");            
+            default -> Locale.getDefault(); 
+        };
+        var formatter = NumberFormat.getCurrencyInstance(locale);
+        return formatter.format(displayAmount);
     }
 
     public static Money zero(Currency currency) {
