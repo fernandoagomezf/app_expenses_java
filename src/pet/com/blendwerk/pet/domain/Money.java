@@ -48,6 +48,11 @@ public record Money(BigDecimal amount, Currency currency) {
         return new Money(newAmount, this.currency);
     }
 
+    public Money scale(int factor) {
+        var bigFactor = BigDecimal.valueOf(factor);
+        return scale(bigFactor);
+    }
+
     public String toString() {
         var displayAmount = amount.setScale(DISPLAY_SCALE, RoundingMode.HALF_UP);
 
