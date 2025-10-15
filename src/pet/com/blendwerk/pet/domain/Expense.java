@@ -7,7 +7,7 @@ import com.blendwerk.pet.domain.ExpenseCategory;
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.Money;
 
-public final class Expense extends BudgetTransaction {    
+public final class Expense extends Transaction {    
     private ExpenseCategory _category;
 
     Expense(Budget budget) {

@@ -57,12 +57,12 @@ public final class Budget {
         return expense;   
     }
 
-    public Optional<BudgetTransaction> find(Identifier id){
+    public Optional<Transaction> find(Identifier id){
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null.");
         }
 
-        Optional<BudgetTransaction> result = Optional.empty();
+        Optional<Transaction> result = Optional.empty();
         if (_incomes.containsKey(id)) {
             var income = _incomes.get(id);
             result = Optional.of(income);
@@ -73,7 +73,7 @@ public final class Budget {
         return result;
     }
     
-    public BudgetTransaction get(Identifier id){        
+    public Transaction get(Identifier id){        
         var result = find(id);
         if (result.isEmpty()) {
             throw new IllegalArgumentException("No transaction with the given ID exists in this budget.");
@@ -82,15 +82,15 @@ public final class Budget {
         return result.get();
     }
     
-    public Stream<BudgetTransaction> stream() {
+    public Stream<Transaction> stream() {
         var incomes = _incomes
             .values()
             .stream()
-            .map(i -> (BudgetTransaction) i);
+            .map(x -> (Transaction)x);
         var expenses = _expenses
             .values()
             .stream()
-            .map(e -> (BudgetTransaction) e);
+            .map(x -> (Transaction)x);
         
         return Stream.concat(incomes, expenses);
     }
@@ -98,7 +98,7 @@ public final class Budget {
     public Money balance() {
         var zero = Money.zero(_currency);
         var result = stream()
-        .map(BudgetTransaction::signedAmount)
+        .map(Transaction::signedAmount)
         .reduce(zero, Money::add);        
 
         return result;

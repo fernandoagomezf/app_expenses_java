@@ -6,7 +6,7 @@ import com.blendwerk.pet.domain.Money;
 
 import java.time.Instant;
 
-public final class Income extends BudgetTransaction {
+public final class Income extends Transaction {
     private IncomeCategory _category;
 
     Income(Budget budget) {

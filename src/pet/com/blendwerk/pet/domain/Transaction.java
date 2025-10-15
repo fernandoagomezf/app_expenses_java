@@ -7,14 +7,14 @@ import com.blendwerk.pet.domain.Budget;
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.Money;
 
-public abstract class BudgetTransaction {
+public abstract class Transaction {
     private final Identifier _id;
     private final Budget _budget;
     private Money _amount;    
     private final Instant _createdAt;
     private Instant _updatedAt;
 
-    protected BudgetTransaction(Budget budget) {
+    protected Transaction(Budget budget) {
         if (budget == null) {
             throw new IllegalArgumentException("Income must be associated with a budget.");
         }
