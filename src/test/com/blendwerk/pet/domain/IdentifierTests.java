@@ -1,10 +1,9 @@
-package com.blendwerk.nova.domain;
+package com.blendwerk.pet.domain;
 
 import java.lang.IllegalArgumentException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-
 import java.util.UUID;
 import com.blendwerk.pet.domain.Identifier;
 
