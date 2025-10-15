@@ -21,7 +21,7 @@ public final class Budget {
     private final HashMap<Identifier, Expense> _expenses;
 
     public Budget(String name, Currency currency) {
-        if (_name == null || _name.isBlank()) {
+        if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Budget must have a name.");
         }
         _id = Identifier.create();
