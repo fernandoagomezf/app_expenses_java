@@ -56,12 +56,31 @@
             }
         }, 
         {
+            "label": "Compile Tests",
+            "type":"shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "javac -cp \"lib/*;build/classes/pet\" -d build/test-classes src/test/com/blendwerk/pet/domain/*.java"
+            ],
+            "group":"build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "showReuseMessage": true,
+                "clear": true  
+            }       
+        },
+        {
             "label": "Build Solution",
             "dependsOrder": "sequence",
             "dependsOn": [
                 "Clean Directories",
                 "Compile Module",
                 "Package Module",
+                "Compile Tests"
             ],
             "group": {
                 "kind":"build",
@@ -75,6 +94,24 @@
                 "showReuseMessage": true,
                 "clear": true
             }
+        }, 
+        {
+            "label":"Test PET Module",
+            "type":"shell",
+            "command":"cmd",
+            "args": [
+                "/c",
+                "java -jar lib/junit-platform-console-standalone-1.10.0.jar -cp \"lib/junit-platform-console-standalone-1.10.0.jar;build/classes/pet;build/test-classes\" --scan-classpath"
+            ],
+            "group":"test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "clear": true,
+                "showReuseMessage": true,
+                "panel":"dedicated"
+            },
+            "dependsOn":"Compile Tests"
         }
     ]
 }
