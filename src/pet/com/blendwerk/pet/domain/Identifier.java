@@ -11,7 +11,8 @@ public record Identifier(UUID value) {
     }
 
     public boolean isEmpty() {
-        return value.equals(empty());
+        return value.getLeastSignificantBits() == 0L 
+            && value.getMostSignificantBits() == 0L;
     }
 
     public final String toString() {
@@ -19,7 +20,7 @@ public record Identifier(UUID value) {
     }
 
     public static Identifier empty() {
-        return new Identifier(new UUID(0l, 0l));
+        return new Identifier(new UUID(0L, 0L));
     }
 
     public static Identifier create() {
