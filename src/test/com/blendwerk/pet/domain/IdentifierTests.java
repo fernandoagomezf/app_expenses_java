@@ -87,4 +87,62 @@ public class IdentifierTests {
         Assertions.assertNotEquals(subject1, subject2);
         Assertions.assertNotEquals(subject2, subject1);
     }
+
+    @Test 
+    @DisplayName("isEmpty :: empty identifier :: returns true") 
+    public void isEmpty_emptyIdentifier_returnsTrue() {
+        // arrange 
+        var uuid = new UUID(0L, 0L);
+        var subject = new Identifier(uuid);
+        // act 
+        var result = subject.isEmpty();
+        // assert
+        Assertions.assertTrue(result);
+    }
+
+    @Test 
+    @DisplayName("isEmpty :: non-empty identifier :: returns false")
+    public void isEmpty_nonEmptyIdentifier_returnsFalse() {
+        // arrange 
+        var uuid = UUID.randomUUID();
+        var subject = new Identifier(uuid);
+        // act 
+        var result = subject.isEmpty();
+        // assert
+        Assertions.assertFalse(result);
+    }
+
+    @Test 
+    @DisplayName("toString :: valid identifier :: returns string representation")
+    public void toString_validIdentifier_returnsStringRepresentation() {
+        // arrange 
+        var uuid = UUID.randomUUID();
+        var subject = new Identifier(uuid);
+        // act 
+        var result = subject.toString();
+        // assert
+        Assertions.assertEquals(uuid.toString(), result);
+    }
+
+    @Test 
+    @DisplayName("create :: call method :: returns non-empty identifier")
+    public void create_callMethod_returnsNonEmptyIdentifier() {
+        // arrange 
+        // act 
+        var subject = Identifier.create();
+        // assert
+        Assertions.assertNotNull(subject);
+        Assertions.assertFalse(subject.isEmpty());
+    }
+
+    @Test 
+    @DisplayName("empty :: call method :: returns empty identifier")
+    public void empty_callMethod_returnsEmptyIdentifier() {
+        // arrange 
+        // act 
+        var subject = Identifier.empty();
+        // assert
+        Assertions.assertNotNull(subject);
+        Assertions.assertTrue(subject.isEmpty());
+    }
 }
