@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions;
 import com.blendwerk.pet.domain.Budget;
 import com.blendwerk.pet.domain.Currency;
 import com.blendwerk.pet.domain.Transaction;
-import com.blendwerk.pet.domain.Identifier;
 
 @DisplayName("PET::Domain::Transaction class")
 public class TransactionTests {
