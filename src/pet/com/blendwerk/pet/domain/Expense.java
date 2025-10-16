@@ -16,7 +16,7 @@ public final class Expense extends Transaction {
     }
 
     protected int sign() {
-        return 1;
+        return -1;
     }
 
     public ExpenseCategory category() {
