@@ -1,11 +1,6 @@
 package com.blendwerk.pet.infrastructure;
 
-import java.io.IOException;
 import java.lang.String;
-import java.lang.StringBuilder;
-import java.lang.System;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import com.blendwerk.pet.domain.Budget;
@@ -19,25 +14,18 @@ import com.blendwerk.pet.domain.Money;
 
 public final class FileBudgetRepository {
     private final Cache _cache;
-    private final String _basePath;
+    private final Storage _storage;
     
-    public FileBudgetRepository(Cache cache) {
+    public FileBudgetRepository(Cache cache, Storage storage) {
         if (cache == null) {
             throw new IllegalArgumentException("Cache cannot be null.");
         }
-        _cache = cache;
-        
-        var appData = System.getProperty("user.home");
-        _basePath = appData + "\\Blendwerk\\PET\\";
-    }    
-
-    private Path getPath(Identifier id) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null.");
+        if (storage == null) {
+            throw new IllegalArgumentException("Storage cannot be null.");
         }
-
-        return Path.of(_basePath + id.toString() + ".json");
-    }
+        _cache = cache;
+        _storage = storage;
+    }    
 
     public Budget get(Identifier id) throws RepositoryException {
         if (id == null) {
@@ -49,44 +37,44 @@ public final class FileBudgetRepository {
             if (_cache.contains(id)) {
                 budget = (Budget)_cache.get(id);
             } else {
-                var path = getPath(id);
-                var parser = new FileParser();
-                parser.parse(path);
+                _storage.select(id.value());
+                _storage.load();
+
+                String budgetId = _storage.get("Budget", "ID");
+                String budgetName = _storage.get("Budget", "Name");
+                String budgetCurrency = _storage.get("Budget", "Currency");
 
                 var transactions = new ArrayList<Transaction>();
-                for (var transactionId : parser.getTransactions()) {
-                    var sign = Integer.valueOf(parser.getTransactionSign(transactionId));        
-                    var tranId = Identifier.of(transactionId);
-                    var category = parser.getTransactionCategory(transactionId);
+                for (var section : _storage.getSections()) {
+                    var transactionSign = _storage.get(section, "Sign");
+                    var transactionAmount = _storage.get(section, "Amount");
+                    var transactionCurrency = _storage.get(section, "Currency");
+                    var transactionCategory = _storage.get(section, "Category");
+                    
                     var amount = Money.of(
-                        parser.getTransactionAmount(transactionId), 
-                        Currency.valueOf(parser.getTransactionCurrency(transactionId))
+                        transactionAmount, 
+                        Currency.valueOf(transactionCurrency)
                     );
-                    Transaction transaction = sign > 0 ?
-                        new Income(tranId, category, amount) :
-                        new Expense(tranId, category, amount);
-                    /*if (sign >= 0) {
-                        transaction = new Income(id, category, amount);
-                    } else {
-                        transaction = new Expense(id, category, amount);
-                    }*/
+                    Transaction transaction = Integer.parseInt(transactionSign) > 0 ?
+                        new Income(Identifier.of(section), transactionCategory, amount) :
+                        new Expense(Identifier.of(section), transactionCategory, amount);                    
                     transactions.add(transaction);
                 }
                 
                 budget = new Budget(
-                    Identifier.of(parser.getBudgetId()), 
-                    parser.getBudgetName(), 
-                    Currency.valueOf(parser.getBudgetCurrency()), 
+                    Identifier.of(budgetId), 
+                    budgetName, 
+                    Currency.valueOf(budgetCurrency), 
                     transactions
                 );
                 _cache.put(budget);
             }
-        } catch (IOException ex) {
-
+        } catch (StorageException ex) {
+            throw new RepositoryException("Could not reconstruct a budget: storage not available.", ex);
         } catch (NumberFormatException ex) {
-
+            throw new RepositoryException("Could not reconstruct a budget: storage with invalid format.", ex);
         } catch (IllegalArgumentException ex) {
-
+            throw new RepositoryException("Could not reconstruct a budget: storage with invalid data.", ex);
         } 
 
         return budget;
@@ -98,36 +86,29 @@ public final class FileBudgetRepository {
         }
         
         try {
-            var text = new StringBuilder();
-            text.append("[Blendwerk PET Budget File]\n")
-                .append("Version=0.1.0\n")
-                .append("\n");
-
-            text.append("[Budget]\n")
-                .append("ID=").append(budget.id()).append("\n")
-                .append("Name=").append(budget.name()).append("\n")
-                .append("Currency=").append(budget.currency()).append("\n")
-                .append("\n");
-
-            text.append("[Transactions]\n");
+            _storage.select(budget.id().value());
+            
+            _storage.set("Header", "Version", "0.1.0");
+            _storage.set("Budget", "ID", budget.id().value().toString());
+            _storage.set("Budget", "Name", budget.name());
+            _storage.set("Budget", "Currency", budget.currency().toString());
+            
             var i = budget.stream()
                 .sorted(Comparator.comparing(Transaction::category))
                 .iterator();
             while (i.hasNext()) {
                 var item = i.next();
-                text.append("ID=").append(item.id())
-                    .append("\n\tAmount=").append(item.signedAmount())
-                    .append("\n\tCurrency=").append(item.signedAmount().currency())
-                    .append("\n\tCategory").append(item.category())
-                    .append("\n");
+                var sectionName = item.id().value().toString();
+                _storage.set(sectionName, "Sign", String.valueOf(item.sign()));
+                _storage.set(sectionName, "Amount", item.amount().value().toString());
+                _storage.set(sectionName, "Currency", item.amount().currency().toString());
+                _storage.set(sectionName, "Category", item.category());
             }
-
-            var path = getPath(budget.id());
-            Files.writeString(path, text.toString());
+            _storage.save();
             _cache.put(budget);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RepositoryException("Failed to save budget file: " + e.getMessage(), e);
+        } catch (StorageException ex) {
+            ex.printStackTrace();
+            throw new RepositoryException("Could not persist a budget: " + ex.getMessage(), ex);
         }
     }
 
@@ -136,14 +117,8 @@ public final class FileBudgetRepository {
             throw new IllegalArgumentException("Budget ID cannot be null.");
         }
 
-        try {
-            var path = getPath(budgetId);
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RepositoryException("Failed to delete budget file: " + e.getMessage(), e);
-        }
-
+        _storage.select(budgetId.value());
+        _storage.delete();
         _cache.erase(budgetId);
     }
 
