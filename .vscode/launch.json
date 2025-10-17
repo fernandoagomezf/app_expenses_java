@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Java Program",
+            "request": "launch",
+            "mainClass": "com.blendwerk.pet.application.Program",
+            "console": "integratedTerminal", 
+            "modulePaths": [
+                "${workspaceFolder}/build/jars/pet.jar",
+                "${workspaceFolder}/lib"
+            ], 
+            "classPaths": [],
+            "vmArgs": "--module-path ${workspaceFolder}/build/jars;${workspaceFolder}/lib --module pet/com.blendwerk.pet.application.Program"
+        }
+    ]
+}
