@@ -5,20 +5,12 @@ import java.lang.IllegalArgumentException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
-import com.blendwerk.pet.domain.Identifier;
-import com.blendwerk.pet.domain.Currency;
-import com.blendwerk.pet.domain.Expense;
-import com.blendwerk.pet.domain.ExpenseCategory;
-import com.blendwerk.pet.domain.Income;
-import com.blendwerk.pet.domain.IncomeCategory;
-import com.blendwerk.pet.domain.Money;
 
-public final class Budget {
+public final class Budget implements Entity {
     private final Identifier _id;
     private Currency _currency;
     private String _name;
-    private final HashMap<Identifier, Income> _incomes;
-    private final HashMap<Identifier, Expense> _expenses;
+    private final HashMap<Identifier, Transaction> _transactions;
 
     public Budget(String name, Currency currency) {
         if (name == null || name.isBlank()) {
@@ -27,8 +19,23 @@ public final class Budget {
         _id = Identifier.create();
         _name = name;
         _currency = currency;
-        _incomes = new HashMap<>();
-        _expenses = new HashMap<>();
+        _transactions = new HashMap<>();
+    }
+
+    public Budget(Identifier id, String name, Currency currency, Iterable<Transaction> transactions) {
+        if (id == null || name == null || name.isBlank() || currency == null || transactions == null) {
+            throw new IllegalArgumentException("Cannot reconstruct budget from invalid arguments.");
+        }
+        _id = id;
+        _name = name;
+        _currency = currency;
+        _transactions = new HashMap<>();
+        for (var transaction : transactions) {
+            if (transaction.amount().currency() != currency) {
+                throw new IllegalArgumentException("Cannot reconstruct budget: transaction currency mismatch.");
+            }
+            _transactions.put(transaction.id(), transaction);
+        }
     }
 
     public Identifier id() {
@@ -44,16 +51,38 @@ public final class Budget {
     }
 
     public Income credit(Money amount, IncomeCategory category) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null.");
+        }
+        if (_currency != amount.currency()) {
+            throw new IllegalArgumentException("Amount currency must match the budget's.");
+        }
+
         var income = new Income(this);
-        income.update(amount, category);
-        _incomes.put(income.id(), income);
+        income.update(amount);
+        income.categorize(category);
+        _transactions.put(income.id(), income);
         return income;   
     }
 
     public Expense debit(Money amount, ExpenseCategory category) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null.");
+        }
+        if (_currency != amount.currency()) {
+            throw new IllegalArgumentException("Amount currency must match the budget's.");
+        }
+
         var expense = new Expense(this);
-        expense.update(amount, category);
-        _expenses.put(expense.id(), expense);
+        expense.update(amount);
+        expense.categorize(category);
+        _transactions.put(expense.id(), expense);
         return expense;   
     }
 
@@ -63,13 +92,11 @@ public final class Budget {
         }
 
         Optional<Transaction> result = Optional.empty();
-        if (_incomes.containsKey(id)) {
-            var income = _incomes.get(id);
-            result = Optional.of(income);
-        } else if (_expenses.containsKey(id)) {
-            var expense = _expenses.get(id);
-            result = Optional.of(expense);
-        }        
+        if (_transactions.containsKey(id)) {
+            var item = _transactions.get(id);
+            result = Optional.of(item);
+        }
+
         return result;
     }
     
@@ -83,16 +110,9 @@ public final class Budget {
     }
     
     public Stream<Transaction> stream() {
-        var incomes = _incomes
+        return _transactions
             .values()
-            .stream()
-            .map(x -> (Transaction)x);
-        var expenses = _expenses
-            .values()
-            .stream()
-            .map(x -> (Transaction)x);
-        
-        return Stream.concat(incomes, expenses);
+            .stream();
     }
 
     public Money balance() {

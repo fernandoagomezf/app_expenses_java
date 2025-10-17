@@ -1,6 +1,7 @@
 package com.blendwerk.pet.domain;
 
 import java.lang.IllegalArgumentException;
+import java.lang.String;
 import java.util.UUID;
 
 public record Identifier(UUID value) {
@@ -25,5 +26,13 @@ public record Identifier(UUID value) {
 
     public static Identifier create() {
         return new Identifier(UUID.randomUUID());
+    }
+
+    public static Identifier of(String uuid){
+        if (uuid == null || uuid.isBlank()) {
+            throw new IllegalArgumentException("The string cannot be null or blank.");
+        }
+        
+        return new Identifier(UUID.fromString(uuid));
     }
 }

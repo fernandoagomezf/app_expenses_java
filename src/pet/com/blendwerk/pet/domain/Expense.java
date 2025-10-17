@@ -1,33 +1,24 @@
 package com.blendwerk.pet.domain;
 
 import java.lang.String;
-import java.time.Instant;
-import com.blendwerk.pet.domain.Budget;
-import com.blendwerk.pet.domain.ExpenseCategory;
-import com.blendwerk.pet.domain.Identifier;
-import com.blendwerk.pet.domain.Money;
 
-public final class Expense extends Transaction {    
-    private ExpenseCategory _category;
-
-    Expense(Budget budget) {
+public final class Expense extends Transaction {
+    public Expense(Budget budget) {
         super(budget);
-        _category = ExpenseCategory.OTHER;
     }
 
-    protected int sign() {
+    public Expense(Identifier id, String category, Money amount) {
+        super(id, category, amount);
+    }
+
+    public int sign() {
         return -1;
     }
-
-    public ExpenseCategory category() {
-        return _category;
-    }
     
-    public void update(Money amount, ExpenseCategory category) {
+    public void categorize(ExpenseCategory category) {
         if (category == null) {
             throw new IllegalArgumentException("Expense category cannot be null.");
         }
-        _category = category;
-        update(amount);
+        categorize(category.toString());
     }
 }

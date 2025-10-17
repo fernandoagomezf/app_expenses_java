@@ -3,11 +3,9 @@ package com.blendwerk.pet.domain;
 import java.lang.IllegalArgumentException;
 import java.lang.NumberFormatException;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
-import com.blendwerk.pet.domain.Currency;
 
 public record Money(BigDecimal amount, Currency currency) {
     public static final int INTERNAL_SCALE = 8;
