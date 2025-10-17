@@ -11,5 +11,22 @@
         "src/main/java",
         "src/pet"
     ],
-    "java.project.outputPath": "build/classes"
+    "java.project.outputPath": "build/classes",
+    "java.test.config": [
+        {
+            "name": "test",
+            "workingDirectory": "${workspaceFolder}",
+            "sourcePaths": [
+                "src/test"
+            ],
+            "classPaths": [
+                "build/classes/pet",
+                "build/test-classes",
+                "lib/junit-platform-console-standalone-1.10.0.jar"
+            ]
+        }
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ]
 }
