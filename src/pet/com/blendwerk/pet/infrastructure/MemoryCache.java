@@ -66,6 +66,9 @@ public class MemoryCache implements Cache {
     }
 
     public void remove(Identifier id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Identifier cannot be null");
+        }
         _entities.remove(id);
     }
 

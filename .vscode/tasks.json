@@ -61,7 +61,7 @@
             "command": "cmd",
             "args": [
                 "/c",
-                "javac -cp \"lib/*;build/classes/pet\" -d build/test-classes src/test/com/blendwerk/pet/domain/*.java"
+                "javac -cp \"lib/*;build/classes/pet\" -d build/test-classes src/test/com/blendwerk/pet/domain/*.java src/test/com/blendwerk/pet/infrastructure/*.java"
             ],
             "group":"build",
             "presentation": {
