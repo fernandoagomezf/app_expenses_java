@@ -2,11 +2,6 @@ package com.blendwerk.pet.domain;
 
 import java.lang.IllegalArgumentException;
 import java.lang.String;
-import java.time.Instant;
-import com.blendwerk.pet.domain.Budget;
-import com.blendwerk.pet.domain.Entity;
-import com.blendwerk.pet.domain.Identifier;
-import com.blendwerk.pet.domain.Money;
 
 public abstract class Transaction implements Entity {
     private final Identifier _id;
