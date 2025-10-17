@@ -10,5 +10,5 @@ public interface Cache {
     Entity get(Identifier id);
     void put(Entity entity);
     void erase(Identifier id);
-    void setMaxSize(int maxSize);
+    void remove(Identifier id);
 }
