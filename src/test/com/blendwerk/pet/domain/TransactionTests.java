@@ -20,7 +20,7 @@ public class TransactionTests {
             _sign = 1;
         }
 
-        protected int sign() {
+        public int sign() {
             return _sign;
         }
     }
@@ -37,14 +37,8 @@ public class TransactionTests {
         // assert
         Assertions.assertNotNull(subject.id());
         Assertions.assertFalse(subject.id().isEmpty());
-        Assertions.assertEquals(budget, subject.budget());
+        Assertions.assertEquals(Currency.MXN, subject.amount().currency());
         Assertions.assertEquals(Money.zero(budget.currency()), subject.amount());
-        Assertions.assertNotNull(subject.createdAt());
-        Assertions.assertFalse(subject.createdAt().isBefore(start));
-        Assertions.assertFalse(subject.createdAt().isAfter(end));
-        Assertions.assertNotNull(subject.updatedAt());
-        Assertions.assertFalse(subject.updatedAt().isBefore(start));
-        Assertions.assertFalse(subject.updatedAt().isAfter(end));        
     }
 
     @Test 
@@ -64,18 +58,11 @@ public class TransactionTests {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
         Transaction subject = new TestTransaction(budget);        
-        var prevUpdatedAt = subject.updatedAt();
         var amount = Money.of("123.45678", budget.currency());
-        var start = Instant.now();
         // act 
         subject.update(amount);
-        var end = Instant.now();
         // assert
         Assertions.assertEquals(amount, subject.amount());
-        Assertions.assertNotNull(subject.updatedAt());
-        Assertions.assertFalse(subject.updatedAt().isBefore(start));
-        Assertions.assertFalse(subject.updatedAt().isAfter(end));       
-        Assertions.assertFalse(subject.updatedAt().isAfter(prevUpdatedAt));
     }
 
     @Test 
@@ -120,5 +107,18 @@ public class TransactionTests {
         var result = subject.signedAmount();
         // assert
         Assertions.assertEquals(expected, result);
+    }
+
+    @Test 
+    @DisplayName("categorize :: valid category :: updates correctly")
+    public void categorize_validCategory_updatesCorrectly() {
+        // arrange 
+        var budget = new Budget("Test", Currency.MXN);
+        Transaction subject = new TestTransaction(budget);        
+        var category = "Food";
+        // act 
+        subject.categorize(category);
+        // assert
+        Assertions.assertEquals(category, subject.category());
     }
 }

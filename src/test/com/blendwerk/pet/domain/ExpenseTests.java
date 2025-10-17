@@ -21,9 +21,9 @@ public class ExpenseTests {
         // assert
         Assertions.assertNotNull(subject.id());
         Assertions.assertFalse(subject.id().isEmpty());
-        Assertions.assertEquals(budget, subject.budget());
+        Assertions.assertEquals(Currency.MXN, subject.amount().currency());
         Assertions.assertEquals(Money.zero(budget.currency()), subject.amount());
-        Assertions.assertEquals(ExpenseCategory.OTHER, subject.category());
+        Assertions.assertEquals(Expense.CATEGORY_GENERAL, subject.category());
     }
 
     @Test 
@@ -46,10 +46,9 @@ public class ExpenseTests {
         var amount = Money.of("123.456", budget.currency());
         var category = ExpenseCategory.TAXES;
         // act 
-        subject.update(amount, category);
+        subject.update(amount);
         // assert
         Assertions.assertEquals(amount, subject.amount());
-        Assertions.assertEquals(category, subject.category());
     }
 
     @Test 
@@ -59,24 +58,9 @@ public class ExpenseTests {
         var budget = new Budget("Test", Currency.MXN);
         var subject = new Expense(budget);
         Money amount = null;
-        var category = ExpenseCategory.TAXES;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            subject.update(amount, category);
-        });
-    }
-
-    @Test 
-    @DisplayName("update :: use null category parameter :: throws exception")
-    public void update_nullCategoryParameter_throwsException() {
-        // arrange 
-        var budget = new Budget("Test", Currency.MXN);
-        var subject = new Expense(budget);
-        var amount = Money.of("123.456", budget.currency());
-        ExpenseCategory category = null;
-        // act & assert
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            subject.update(amount, category);
+            subject.update(amount);
         });
     }
 
@@ -87,11 +71,37 @@ public class ExpenseTests {
         var budget = new Budget("Test", Currency.MXN);
         var subject = new Expense(budget);        
         var amount = Money.of("123.456", budget.currency());
-        subject.update(amount, ExpenseCategory.TAXES);
+        subject.update(amount);
         var expected = Money.of("-123.456", budget.currency());
         // act 
         var actual = subject.signedAmount();
         // assert
         Assertions.assertEquals(expected, actual);
+    }
+
+    @Test 
+    @DisplayName("categorize :: valid category :: updates correctly")
+    public void categorize_validCategory_updatesCorrectly() {
+        // arrange 
+        var budget = new Budget("Test", Currency.MXN);
+        var subject = new Expense(budget);        
+        var category = ExpenseCategory.PERSONAL_CARE;
+        // act 
+        subject.categorize(category);
+        // assert
+        Assertions.assertEquals(category.toString(), subject.category());
+    }
+
+    @Test 
+    @DisplayName("categorize :: null category :: throws exception")
+    public void categorize_nullCategory_throwsException() {
+        // arrange 
+        var budget = new Budget("Test", Currency.MXN);
+        var subject = new Expense(budget);        
+        ExpenseCategory category = null;
+        // act & assert
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            subject.categorize(category);
+        });
     }
 }
