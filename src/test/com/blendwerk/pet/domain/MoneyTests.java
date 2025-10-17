@@ -2,9 +2,12 @@ package com.blendwerk.pet.domain;
 
 import java.lang.IllegalArgumentException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import com.blendwerk.pet.domain.Money;
+import com.blendwerk.pet.domain.Currency;
 
 @DisplayName("PET::Domain::Money record")
 public class MoneyTests {
@@ -13,12 +16,12 @@ public class MoneyTests {
     public void ctor_validParameters_validInstance() {
         // arrange 
         var amount = new BigDecimal("123.45678901");
-        amount = amount.setScale(Money.INTERNAL_SCALE, java.math.RoundingMode.HALF_UP);
+        amount = amount.setScale(Money.INTERNAL_SCALE, RoundingMode.HALF_UP);
         var currency = Currency.MXN;
         // act 
         var subject = new Money(amount, currency);
         // assert
-        Assertions.assertEquals(amount, subject.amount());
+        Assertions.assertEquals(amount, subject.value());
         Assertions.assertEquals(currency, subject.currency());
     }    
 }

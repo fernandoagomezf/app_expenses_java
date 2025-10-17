@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public record Money(BigDecimal amount, Currency currency) {
+public record Money(BigDecimal value, Currency currency) {
     public static final int INTERNAL_SCALE = 8;
     public static final int DISPLAY_SCALE = 2;
 
@@ -15,8 +15,8 @@ public record Money(BigDecimal amount, Currency currency) {
         if (currency == null) {
             throw new IllegalArgumentException("Currency cannot be null");
         }
-        if (amount.scale() != INTERNAL_SCALE) {
-            amount = amount.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
+        if (value.scale() != INTERNAL_SCALE) {
+            value = value.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
         }
     }
     
@@ -24,7 +24,7 @@ public record Money(BigDecimal amount, Currency currency) {
         if (!currency.equals(other.currency)) {
             throw new IllegalArgumentException("Cannot add different currencies");
         }
-        var newAmount = amount.add(other.amount);
+        var newAmount = value.add(other.value);
         return new Money(newAmount, currency);
     }
 
@@ -33,7 +33,7 @@ public record Money(BigDecimal amount, Currency currency) {
             throw new IllegalArgumentException("Cannot subtract different currencies");
         }
 
-        var newAmount = amount.subtract(other.amount);
+        var newAmount = value.subtract(other.value);
         return new Money(newAmount, currency);
     }
 
@@ -42,7 +42,7 @@ public record Money(BigDecimal amount, Currency currency) {
             throw new IllegalArgumentException("Scale factor cannot be null");
         }
 
-        var newAmount = amount.multiply(factor);
+        var newAmount = value.multiply(factor);
         return new Money(newAmount, this.currency);
     }
 
@@ -52,7 +52,7 @@ public record Money(BigDecimal amount, Currency currency) {
     }
 
     public String toString() {
-        var displayAmount = amount.setScale(DISPLAY_SCALE, RoundingMode.HALF_UP);
+        var displayAmount = value.setScale(DISPLAY_SCALE, RoundingMode.HALF_UP);
 
         var locale = switch (currency) {
             case MXN -> Locale.forLanguageTag("es-MX");            
