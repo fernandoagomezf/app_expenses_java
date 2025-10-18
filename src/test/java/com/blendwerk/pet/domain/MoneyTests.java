@@ -1,13 +1,10 @@
 package com.blendwerk.pet.domain;
 
-import java.lang.IllegalArgumentException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import com.blendwerk.pet.domain.Money;
-import com.blendwerk.pet.domain.Currency;
 
 @DisplayName("PET::Domain::Money record")
 public class MoneyTests {

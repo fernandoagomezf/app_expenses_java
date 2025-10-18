@@ -1,15 +1,9 @@
 package com.blendwerk.pet.domain;
 
 import java.lang.IllegalArgumentException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import com.blendwerk.pet.domain.Budget;
-import com.blendwerk.pet.domain.Currency;
-import com.blendwerk.pet.domain.Transaction;
 
 @DisplayName("PET::Domain::Transaction class")
 public class TransactionTests {
@@ -29,11 +23,9 @@ public class TransactionTests {
     @DisplayName("ctor :: use valid parameters :: valid instance ")
     public void ctor_validParameters_validInstance() {
         // arrange 
-        var start = Instant.now();
         var budget = new Budget("Test", Currency.MXN);
         // act 
         Transaction subject = new TestTransaction(budget);
-        var end = Instant.now();
         // assert
         Assertions.assertNotNull(subject.id());
         Assertions.assertFalse(subject.id().isEmpty());
@@ -48,7 +40,7 @@ public class TransactionTests {
         Budget budget = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Transaction subject = new TestTransaction(budget);
+            new TestTransaction(budget);
         });
     }
 

@@ -9,24 +9,11 @@
     "java.jdt.ls.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.8.9-hotspot",
     "java.project.sourcePaths": [
         "src/main/java",
-        "src/pet"
+        "src/test/java"
     ],
     "java.project.outputPath": "build/classes",
-    "java.test.config": [
-        {
-            "name": "test",
-            "workingDirectory": "${workspaceFolder}",
-            "sourcePaths": [
-                "src/test"
-            ],
-            "classPaths": [
-                "build/classes/pet",
-                "build/test-classes",
-                "lib/junit-platform-console-standalone-1.10.0.jar"
-            ]
-        }
-    ],
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

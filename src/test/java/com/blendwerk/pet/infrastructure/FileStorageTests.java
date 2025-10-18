@@ -258,6 +258,7 @@ public class FileStorageTests {
         // assert
         int count = 0;
         for (var section : sections) {
+            Assertions.assertTrue(section != null);
             count++;
         }
         Assertions.assertEquals(3, count);

@@ -4,26 +4,22 @@ import java.lang.IllegalArgumentException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import com.blendwerk.pet.domain.Budget;
-import com.blendwerk.pet.domain.Currency;
-import com.blendwerk.pet.domain.Expense;
-import com.blendwerk.pet.domain.ExpenseCategory;
 
-@DisplayName("PET::Domain::Expense class")
-public class ExpenseTests {
+@DisplayName("PET::Domain::Income class")
+public class IncomeTests {
     @Test 
     @DisplayName("ctor :: use valid parameters :: valid instance ")
     public void ctor_validParameters_validInstance() {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
         // act 
-        Expense subject = new Expense(budget);
+        Income subject = new Income(budget);
         // assert
         Assertions.assertNotNull(subject.id());
         Assertions.assertFalse(subject.id().isEmpty());
         Assertions.assertEquals(Currency.MXN, subject.amount().currency());
         Assertions.assertEquals(Money.zero(budget.currency()), subject.amount());
-        Assertions.assertEquals(Expense.CATEGORY_GENERAL, subject.category());
+        Assertions.assertEquals(Income.CATEGORY_GENERAL, subject.category());
     }
 
     @Test 
@@ -33,7 +29,7 @@ public class ExpenseTests {
         Budget budget = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Expense subject = new Expense(budget);
+            new Income(budget);
         });
     }
 
@@ -42,9 +38,8 @@ public class ExpenseTests {
     public void update_validParameters_updatesProperties() {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
-        var subject = new Expense(budget);
+        var subject = new Income(budget);
         var amount = Money.of("123.456", budget.currency());
-        var category = ExpenseCategory.TAXES;
         // act 
         subject.update(amount);
         // assert
@@ -56,7 +51,7 @@ public class ExpenseTests {
     public void update_nullAmountParameter_throwsException() {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
-        var subject = new Expense(budget);
+        var subject = new Income(budget);
         Money amount = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -65,14 +60,14 @@ public class ExpenseTests {
     }
 
     @Test 
-    @DisplayName("signedAmount :: called :: returns amount with negative sign")
+    @DisplayName("signedAmount :: called :: returns amount with positive sign")
     public void signedAmount_called_returnsAmountWithPositiveSign() {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
-        var subject = new Expense(budget);        
+        var subject = new Income(budget);        
         var amount = Money.of("123.456", budget.currency());
         subject.update(amount);
-        var expected = Money.of("-123.456", budget.currency());
+        var expected = Money.of("123.456", budget.currency());
         // act 
         var actual = subject.signedAmount();
         // assert
@@ -84,8 +79,8 @@ public class ExpenseTests {
     public void categorize_validCategory_updatesCorrectly() {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
-        var subject = new Expense(budget);        
-        var category = ExpenseCategory.PERSONAL_CARE;
+        var subject = new Income(budget);        
+        var category = IncomeCategory.SALARY;
         // act 
         subject.categorize(category);
         // assert
@@ -97,8 +92,8 @@ public class ExpenseTests {
     public void categorize_nullCategory_throwsException() {
         // arrange 
         var budget = new Budget("Test", Currency.MXN);
-        var subject = new Expense(budget);        
-        ExpenseCategory category = null;
+        var subject = new Income(budget);        
+        IncomeCategory category = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             subject.categorize(category);

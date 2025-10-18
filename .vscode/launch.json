@@ -3,16 +3,10 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch Java Program",
+            "name": "Paunch PET Program",
             "request": "launch",
             "mainClass": "com.blendwerk.pet.application.Program",
-            "console": "integratedTerminal", 
-            "modulePaths": [
-                "${workspaceFolder}/build/jars/pet.jar",
-                "${workspaceFolder}/lib"
-            ], 
-            "classPaths": [],
-            "vmArgs": "--module-path ${workspaceFolder}/build/jars;${workspaceFolder}/lib --module pet/com.blendwerk.pet.application.Program"
+            "projectName": "expenses_bebdb815"
         }
     ]
 }

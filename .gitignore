@@ -1,3 +1,4 @@
 # personal expense tracker objects to be ignored 
-build/
 lib/
+bin/
+build/

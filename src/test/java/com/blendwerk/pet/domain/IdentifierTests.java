@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import java.util.UUID;
-import com.blendwerk.pet.domain.Identifier;
 
 @DisplayName("PET::Domain::Identifier record")
 public class IdentifierTests {
@@ -28,7 +27,7 @@ public class IdentifierTests {
         UUID uuid = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            var subject = new Identifier(uuid);
+            new Identifier(uuid);
         });
     }
 

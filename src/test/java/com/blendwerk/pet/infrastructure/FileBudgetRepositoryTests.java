@@ -1,6 +1,8 @@
 package com.blendwerk.pet.infrastructure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +13,8 @@ import com.blendwerk.pet.domain.Currency;
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.Money;
 import com.blendwerk.pet.domain.RepositoryException;
-import com.blendwerk.pet.domain.Transaction;
+import com.blendwerk.pet.domain.IncomeCategory;
+import com.blendwerk.pet.domain.ExpenseCategory;
 
 @DisplayName("PET::Infrastructure::FileBudgetRepository class")
 public class FileBudgetRepositoryTests {
@@ -71,7 +74,6 @@ public class FileBudgetRepositoryTests {
     @DisplayName("get :: budget in cache :: returns cached budget")
     public void get_budgetInCache_returnsCachedBudget() throws RepositoryException {
         // arrange
-        var budgetId = Identifier.create();
         var expectedBudget = new Budget("Test Budget", Currency.MXN);
         _mockCache.put(expectedBudget);
         var subject = new FileBudgetRepository(_mockCache, _mockStorage);
@@ -123,6 +125,7 @@ public class FileBudgetRepositoryTests {
         // act
         subject.save(budget);
         // assert
+        Assertions.assertTrue(mockStorage.saveCalled());
         Assertions.assertTrue(_mockCache.contains(budget.id()));
         Assertions.assertEquals(budget.id().value().toString(), mockStorage.get("Budget", "ID"));
         Assertions.assertEquals("Test Budget", mockStorage.get("Budget", "Name"));
@@ -146,8 +149,8 @@ public class FileBudgetRepositoryTests {
     public void save_budgetWithTransactions_storesTransactions() throws RepositoryException {
         // arrange
         var budget = new Budget("Test Budget", Currency.MXN);
-        var income = budget.credit(Money.of("1000.00", Currency.MXN), com.blendwerk.pet.domain.IncomeCategory.SALARY);
-        var expense = budget.debit(Money.of("500.00", Currency.MXN), com.blendwerk.pet.domain.ExpenseCategory.RENT_MORTGAGE);
+        var income = budget.credit(Money.of("1000.00", Currency.MXN), IncomeCategory.SALARY);
+        var expense = budget.debit(Money.of("500.00", Currency.MXN), ExpenseCategory.RENT_MORTGAGE);
         var mockStorage = new MockStorage();
         var subject = new FileBudgetRepository(_mockCache, mockStorage);
         // act
@@ -155,6 +158,7 @@ public class FileBudgetRepositoryTests {
         // assert
         var incomeSign = mockStorage.get(income.id().value().toString(), "Sign");
         var expenseSign = mockStorage.get(expense.id().value().toString(), "Sign");
+        Assertions.assertTrue(mockStorage.saveCalled());
         Assertions.assertEquals("1", incomeSign);
         Assertions.assertEquals("-1", expenseSign);
     }
@@ -171,7 +175,7 @@ public class FileBudgetRepositoryTests {
         // act
         subject.delete(budget.id());
         // assert
-        // Note: MemoryCache.erase() sets the value to null but keeps the key in the map
+        Assertions.assertTrue(mockStorage.deleteCalled());
         Assertions.assertNull(cache.get(budget.id()));
     }
 
@@ -187,24 +191,50 @@ public class FileBudgetRepositoryTests {
         });
     }
 
-    // Mock Storage implementation for testing
+    @Test
+    @DisplayName("get :: budget not in cache :: calls storage load")
+    public void get_budgetNotInCache_callsStorageLoad() throws RepositoryException {
+        // arrange
+        var budgetId = Identifier.create();
+        var mockStorage = new MockStorageWithFilter();
+        mockStorage.set("Budget", "ID", budgetId.value().toString());
+        mockStorage.set("Budget", "Name", "Test Budget");
+        mockStorage.set("Budget", "Currency", "MXN");
+        var subject = new FileBudgetRepository(_mockCache, mockStorage);
+        
+        // act
+        subject.get(budgetId);
+        
+        // assert
+        Assertions.assertTrue(mockStorage.loadCalled(), "Storage load() method should be called when budget is not in cache");
+    }
+
     private class MockStorage implements Storage {
-        private java.util.Map<String, java.util.Map<String, String>> _data = new java.util.HashMap<>();
+        private Map<String, java.util.Map<String, String>> _data = new HashMap<>();
         private boolean _loadCalled = false;
         private boolean _saveCalled = false;
         private boolean _deleteCalled = false;
 
-        @Override
+        public boolean loadCalled() {
+            return _loadCalled;
+        }
+
+        public boolean saveCalled() {
+            return _saveCalled;
+        }
+
+        public boolean deleteCalled() {
+            return _deleteCalled;
+        }
+
         public boolean select(UUID sourceId) {
             return true;
         }
 
-        @Override
         public Iterable<String> getSections() {
             return _data.keySet();
         }
 
-        @Override
         public String get(String sectionName, String key) {
             if (_data.containsKey(sectionName) && _data.get(sectionName).containsKey(key)) {
                 return _data.get(sectionName).get(key);
@@ -218,32 +248,26 @@ public class FileBudgetRepositoryTests {
             }
         }
 
-        @Override
         public void set(String sectionName, String key, String value) {
             set(sectionName);
             _data.get(sectionName).put(key, value);
         }
 
-        @Override
         public void load() throws StorageException {
             _loadCalled = true;
         }
 
-        @Override
         public void save() throws StorageException {
             _saveCalled = true;
         }
 
-        @Override
         public boolean delete() {
             _deleteCalled = true;
             return true;
         }
     }
 
-    // Mock Storage with section filtering (excludes Budget and Header sections from transaction loading)
     private class MockStorageWithFilter extends MockStorage {
-        @Override
         public Iterable<String> getSections() {
             var sections = new ArrayList<String>();
             for (var section : super.getSections()) {
@@ -255,38 +279,30 @@ public class FileBudgetRepositoryTests {
         }
     }
 
-    // Failing Storage implementation for testing error cases
     private class FailingStorage implements Storage {
-        @Override
         public boolean select(UUID sourceId) {
             return true;
         }
 
-        @Override
         public Iterable<String> getSections() {
             return new ArrayList<>();
         }
 
-        @Override
         public String get(String sectionName, String key) {
             return "";
         }
 
-        @Override
         public void set(String sectionName, String key, String value) {
         }
 
-        @Override
         public void load() throws StorageException {
             throw new StorageException("Simulated storage failure");
         }
 
-        @Override
         public void save() throws StorageException {
             throw new StorageException("Simulated storage failure");
         }
 
-        @Override
         public boolean delete() {
             return false;
         }

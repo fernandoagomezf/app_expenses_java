@@ -33,7 +33,7 @@ public class MemoryCacheTests {
     public void ctor_negativeMaxSize_throwsException() {
         // arrange & act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            var cache = new MemoryCache(-1);
+            new MemoryCache(-1);
         });
     }
 
@@ -42,7 +42,7 @@ public class MemoryCacheTests {
     public void ctor_zeroMaxSize_throwsException() {
         // arrange & act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            var cache = new MemoryCache(0);
+            new MemoryCache(0);
         });
     }
 
