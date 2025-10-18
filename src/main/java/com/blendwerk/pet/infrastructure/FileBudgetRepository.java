@@ -4,6 +4,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Comparator;
 import com.blendwerk.pet.domain.Budget;
+import com.blendwerk.pet.domain.BudgetRepository;
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.RepositoryException;
 import com.blendwerk.pet.domain.Currency;
@@ -12,7 +13,7 @@ import com.blendwerk.pet.domain.Income;
 import com.blendwerk.pet.domain.Expense;
 import com.blendwerk.pet.domain.Money;
 
-public final class FileBudgetRepository {
+public final class FileBudgetRepository implements BudgetRepository {
     private final Cache _cache;
     private final Storage _storage;
     
