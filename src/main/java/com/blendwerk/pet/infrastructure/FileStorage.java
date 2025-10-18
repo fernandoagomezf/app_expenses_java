@@ -12,10 +12,7 @@ public class FileStorage implements Storage {
     private final Map<String, Map<String, String>> _sections;
     private Path _sourcePath;
 
-    public FileStorage(Path filePath) {
-        if (filePath == null) {
-            throw new IllegalArgumentException("File path cannot be null");
-        }
+    public FileStorage() {
         _sourcePath = null;
         _sections = new HashMap<>();
     }
@@ -28,7 +25,8 @@ public class FileStorage implements Storage {
             .append(".budget")
             .toString();
         _sourcePath = Path.of(fileName);
-        var validSource = Files.exists(_sourcePath) && Files.isRegularFile(_sourcePath);
+        var validSource = Files.exists(_sourcePath) 
+                       && Files.isRegularFile(_sourcePath);
         return validSource;
     }
 
