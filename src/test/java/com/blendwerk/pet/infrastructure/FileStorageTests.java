@@ -29,33 +29,18 @@ public class FileStorageTests {
         Assertions.assertNotNull(subject.getSections());
     }
 
-    @Test
-    @DisplayName("select :: existing file :: returns true")
-    public void select_existingFile_returnsTrue() throws IOException {
-        // arrange
-        var targetDir = Path.of(System.getProperty("user.home"), "Blendwerk", "PET");
-        Files.createDirectories(targetDir);
-        var budgetFile = targetDir.resolve(_testSourceId + ".budget");
-        Files.writeString(budgetFile, "[test]\n", StandardCharsets.UTF_8);
-        var subject = new FileStorage();
-        // act
-        var result = subject.select(_testSourceId);
-        // assert
-        Assertions.assertTrue(result);
-        // cleanup
-        Files.deleteIfExists(budgetFile);
-    }
-
-    @Test
-    @DisplayName("select :: non-existing file :: returns false")
-    public void select_nonExistingFile_returnsFalse() {
+    @Test 
+    @DisplayName("clear :: after adding data :: empties storage")
+    public void clear_afterAddingData_emptiesStorage() {
         // arrange
         var subject = new FileStorage();
-        var nonExistentId = UUID.randomUUID();
+        subject.set("Section1", "Key1", "Value1");
+        subject.set("Section2", "Key2", "Value2");
         // act
-        var result = subject.select(nonExistentId);
+        subject.clear();
         // assert
-        Assertions.assertFalse(result);
+        var sections = subject.getSections();
+        Assertions.assertFalse(sections.iterator().hasNext());
     }
 
     @Test
@@ -168,13 +153,12 @@ public class FileStorageTests {
         // arrange
         var targetDir = Path.of(System.getProperty("user.home"), "Blendwerk", "PET");
         Files.createDirectories(targetDir);
-        var budgetFile = targetDir.resolve(_testSourceId + ".budget");
+        var budgetFile = targetDir.resolve(_testSourceId + ".dat");
         var subject = new FileStorage();
-        subject.select(_testSourceId);
         subject.set("Section1", "Key1", "Value1");
         subject.set("Section2", "Key2", "Value2");
         // act
-        subject.save();
+        subject.save(_testSourceId);
         // assert
         var content = Files.readString(budgetFile, StandardCharsets.UTF_8);
         Assertions.assertTrue(content.contains("[Section1]"));
@@ -186,13 +170,14 @@ public class FileStorageTests {
     }
 
     @Test
-    @DisplayName("save :: no source selected :: throws exception")
-    public void save_noSourceSelected_throwsException() {
+    @DisplayName("save :: null source ID :: throws exception")
+    public void save_nullSourceId_throwsException() {
         // arrange
+        UUID sourceId = null;
         var subject = new FileStorage();
         // act & assert
-        Assertions.assertThrows(IllegalStateException.class, () -> {
-            subject.save();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            subject.save(sourceId);
         });
     }
 
@@ -202,25 +187,25 @@ public class FileStorageTests {
         // arrange
         var targetDir = Path.of(System.getProperty("user.home"), "Blendwerk", "PET");
         Files.createDirectories(targetDir);
-        var budgetFile = targetDir.resolve(_testSourceId + ".budget");
+        var budgetFile = targetDir.resolve(_testSourceId + ".dat");
         Files.writeString(budgetFile, "test content", StandardCharsets.UTF_8);
         var subject = new FileStorage();
-        subject.select(_testSourceId);
         // act
-        var result = subject.delete();
+        var result = subject.delete(_testSourceId);
         // assert
         Assertions.assertTrue(result);
         Assertions.assertFalse(Files.exists(budgetFile));
     }
 
     @Test
-    @DisplayName("delete :: no source selected :: throws exception")
-    public void delete_noSourceSelected_throwsException() {
+    @DisplayName("delete :: null Source ID :: throws exception")
+    public void delete_nullSourceId_throwsException() {
         // arrange
         var subject = new FileStorage();
+        UUID sourceId = null;
         // act & assert
-        Assertions.assertThrows(IllegalStateException.class, () -> {
-            subject.delete();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            subject.delete(sourceId);
         });
     }
 

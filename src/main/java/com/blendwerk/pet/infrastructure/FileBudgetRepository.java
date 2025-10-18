@@ -38,8 +38,8 @@ public final class FileBudgetRepository implements BudgetRepository {
             if (_cache.contains(id)) {
                 budget = (Budget)_cache.get(id);
             } else {
-                _storage.select(id.value());
-                _storage.load();
+                _storage.clear();
+                _storage.load(id.value());
 
                 String budgetId = _storage.get("Budget", "ID");
                 String budgetName = _storage.get("Budget", "Name");
@@ -86,9 +86,8 @@ public final class FileBudgetRepository implements BudgetRepository {
             throw new IllegalArgumentException("Cannot save a null budget.");
         }
         
-        try {
-            _storage.select(budget.id().value());
-            
+        try {            
+            _storage.clear();
             _storage.set("Header", "Version", "0.1.0");
             _storage.set("Budget", "ID", budget.id().value().toString());
             _storage.set("Budget", "Name", budget.name());
@@ -105,7 +104,7 @@ public final class FileBudgetRepository implements BudgetRepository {
                 _storage.set(sectionName, "Currency", item.amount().currency().toString());
                 _storage.set(sectionName, "Category", item.category());
             }
-            _storage.save();
+            _storage.save(budget.id().value());
             _cache.put(budget);
         } catch (StorageException ex) {
             ex.printStackTrace();
@@ -118,8 +117,7 @@ public final class FileBudgetRepository implements BudgetRepository {
             throw new IllegalArgumentException("Budget ID cannot be null.");
         }
 
-        _storage.select(budgetId.value());
-        _storage.delete();
+        _storage.delete(budgetId.value());
         _cache.erase(budgetId);
     }
 

@@ -10,24 +10,23 @@ import java.util.UUID;
 
 public class FileStorage implements Storage {
     private final Map<String, Map<String, String>> _sections;
-    private Path _sourcePath;
-
+    
     public FileStorage() {
-        _sourcePath = null;
         _sections = new HashMap<>();
     }
 
-    public boolean select(UUID sourceId) {
+    private Path getPath(UUID sourceId) {
         var fileName = new StringBuilder()
             .append(System.getProperty("user.home"))
             .append("\\Blendwerk\\PET\\")
             .append(sourceId)
-            .append(".budget")
+            .append(".dat")
             .toString();
-        _sourcePath = Path.of(fileName);
-        var validSource = Files.exists(_sourcePath) 
-                       && Files.isRegularFile(_sourcePath);
-        return validSource;
+        return Path.of(fileName);
+    }
+
+    public void clear() {
+        _sections.clear();
     }
 
     public Iterable<String> getSections() {
@@ -70,14 +69,15 @@ public class FileStorage implements Storage {
         map.put(key, value);
     }
 
-    public void load() throws StorageException {
-        if (_sourcePath == null) {
-            throw new IllegalStateException("Source path is not selected.");
+    public void load(UUID sourceId) throws StorageException {
+        if (sourceId == null) {
+            throw new IllegalArgumentException("The source ID cannot be null.");
         }
 
         _sections.clear();
         try  {
-            var lines = Files.readAllLines(_sourcePath, StandardCharsets.UTF_8);
+            var sourcePath = getPath(sourceId);
+            var lines = Files.readAllLines(sourcePath, StandardCharsets.UTF_8);
 
             String currentSection = "";
             for (var line : lines) {
@@ -109,9 +109,9 @@ public class FileStorage implements Storage {
         }
     }
 
-    public void save() throws StorageException {
-        if (_sourcePath == null) {
-            throw new IllegalStateException("Source path is not selected.");
+    public void save(UUID sourceId) throws StorageException {
+        if (sourceId == null) {
+            throw new IllegalArgumentException("The source ID cannot be null.");
         }
 
         try {
@@ -130,21 +130,23 @@ public class FileStorage implements Storage {
                 }
                 lines.append(System.lineSeparator());
             }
-            Files.writeString(_sourcePath, lines.toString(), StandardCharsets.UTF_8);
+            var sourcePath = getPath(sourceId);
+            Files.writeString(sourcePath, lines.toString(), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             ex.printStackTrace();
             throw new StorageException("Failed to save a file to the specificed storage.", ex);
         }
     }
 
-    public boolean delete() {
-        if (_sourcePath == null) {
-            throw new IllegalStateException("Source path is not selected.");
+    public boolean delete(UUID sourceId) {
+        if (sourceId == null) {
+            throw new IllegalArgumentException("The source ID cannot be null.");
         }
-        
+
         boolean deleted;
         try {
-            deleted = Files.deleteIfExists(_sourcePath);
+            var sourcePath = getPath(sourceId);
+            deleted = Files.deleteIfExists(sourcePath);
         } catch (IOException ex) {
             ex.printStackTrace();
             deleted = false;

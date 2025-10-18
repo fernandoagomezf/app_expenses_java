@@ -3,11 +3,11 @@ package com.blendwerk.pet.infrastructure;
 import java.util.UUID;
 
 public interface Storage {
-    boolean select(UUID sourceId);
-    boolean delete();
     Iterable<String> getSections();
     String get(String sectionName, String key);
     void set(String sectionName, String key, String value);
-    void load() throws StorageException;
-    void save() throws StorageException;
+    void load(UUID sourceId) throws StorageException;
+    void save(UUID sourceId) throws StorageException;
+    boolean delete(UUID sourceId);
+    void clear();
 }

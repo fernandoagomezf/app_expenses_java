@@ -88,7 +88,7 @@ public class FileBudgetRepositoryTests {
     public void get_budgetNotInCache_loadsFromStorage() throws RepositoryException {
         // arrange
         var budgetId = Identifier.create();
-        var mockStorage = new MockStorageWithFilter();
+        var mockStorage = new MockStorageWithTransactionFilter();
         mockStorage.set("Budget", "ID", budgetId.value().toString());
         mockStorage.set("Budget", "Name", "Test Budget");
         mockStorage.set("Budget", "Currency", "MXN");
@@ -196,7 +196,7 @@ public class FileBudgetRepositoryTests {
     public void get_budgetNotInCache_callsStorageLoad() throws RepositoryException {
         // arrange
         var budgetId = Identifier.create();
-        var mockStorage = new MockStorageWithFilter();
+        var mockStorage = new MockStorageWithTransactionFilter();
         mockStorage.set("Budget", "ID", budgetId.value().toString());
         mockStorage.set("Budget", "Name", "Test Budget");
         mockStorage.set("Budget", "Currency", "MXN");
@@ -210,7 +210,7 @@ public class FileBudgetRepositoryTests {
     }
 
     private class MockStorage implements Storage {
-        private Map<String, java.util.Map<String, String>> _data = new HashMap<>();
+        protected Map<String, java.util.Map<String, String>> _data = new HashMap<>();
         private boolean _loadCalled = false;
         private boolean _saveCalled = false;
         private boolean _deleteCalled = false;
@@ -227,8 +227,8 @@ public class FileBudgetRepositoryTests {
             return _deleteCalled;
         }
 
-        public boolean select(UUID sourceId) {
-            return true;
+        public void clear() {
+            _data.clear();
         }
 
         public Iterable<String> getSections() {
@@ -253,24 +253,48 @@ public class FileBudgetRepositoryTests {
             _data.get(sectionName).put(key, value);
         }
 
-        public void load() throws StorageException {
+        public void load(UUID sourceId) throws StorageException {
             _loadCalled = true;
         }
 
-        public void save() throws StorageException {
+        public void save(UUID sourceId) throws StorageException {
             _saveCalled = true;
         }
 
-        public boolean delete() {
+        public boolean delete(UUID sourceId) {
             _deleteCalled = true;
             return true;
         }
     }
 
-    private class MockStorageWithFilter extends MockStorage {
+    private class MockStorageWithTransactionFilter extends MockStorage {
+        private Map<String, java.util.Map<String, String>> _backupData = new HashMap<>();
+        
+        @Override
+        public void clear() {
+            // Back up the data before clearing
+            _backupData.clear();
+            for (var entry : _data.entrySet()) {
+                _backupData.put(entry.getKey(), new HashMap<>(entry.getValue()));
+            }
+            super.clear();
+        }
+        
+        @Override
+        public void load(UUID sourceId) throws StorageException {
+            super.load(sourceId);
+            // Restore the backed up data
+            _data.clear();
+            for (var entry : _backupData.entrySet()) {
+                _data.put(entry.getKey(), new HashMap<>(entry.getValue()));
+            }
+        }
+        
+        @Override
         public Iterable<String> getSections() {
             var sections = new ArrayList<String>();
             for (var section : super.getSections()) {
+                // Only include sections that are transaction IDs (not "Budget" or "Header")
                 if (!section.equals("Budget") && !section.equals("Header")) {
                     sections.add(section);
                 }
@@ -280,8 +304,7 @@ public class FileBudgetRepositoryTests {
     }
 
     private class FailingStorage implements Storage {
-        public boolean select(UUID sourceId) {
-            return true;
+        public void clear() {
         }
 
         public Iterable<String> getSections() {
@@ -295,15 +318,15 @@ public class FileBudgetRepositoryTests {
         public void set(String sectionName, String key, String value) {
         }
 
-        public void load() throws StorageException {
+        public void load(UUID sourceId) throws StorageException {
             throw new StorageException("Simulated storage failure");
         }
 
-        public void save() throws StorageException {
+        public void save(UUID sourceId) throws StorageException {
             throw new StorageException("Simulated storage failure");
         }
 
-        public boolean delete() {
+        public boolean delete(UUID sourceId) {
             return false;
         }
     }
