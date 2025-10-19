@@ -1,252 +1,245 @@
 package com.blendwerk.pet.application;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 /**
- * Right panel showing detailed information about the selected budget including transactions.
- * Can be hidden/shown and updates when budget selection changes.
+ * Right panel showing detailed information about the selected transaction.
+ * Can be hidden/shown and updates when transaction selection changes in the central tabbed panel.
  */
 public class BudgetDetailsPanel extends JPanel {
-    private JLabel budgetNameLabel;
-    private JLabel budgetCurrencyLabel;
-    private JLabel totalIncomeLabel;
-    private JLabel totalExpensesLabel;
-    private JLabel balanceLabel;
-    private JTable transactionsTable;
-    private DefaultTableModel tableModel;
+    private JLabel transactionTypeLabel;
+    private JLabel transactionCategoryLabel;
+    private JLabel transactionAmountLabel;
+    private JLabel transactionDateLabel;
+    private JLabel transactionCurrencyLabel;
+    private JTextArea transactionDescriptionArea;
+    private JLabel transactionIdLabel;
     private JButton closeButton;
+    private JButton editButton;
+    private JButton deleteButton;
     
     public BudgetDetailsPanel() {
         initializeComponents();
         setupLayout();
         setupEventHandlers();
-        populateWithSampleData();
+        showNoSelectionState();
     }
     
     private void initializeComponents() {
-        // Header labels
-        budgetNameLabel = new JLabel("Budget Name");
-        budgetNameLabel.setFont(budgetNameLabel.getFont().deriveFont(Font.BOLD, 16f));
+        // Header labels for transaction details
+        transactionTypeLabel = new JLabel("No Transaction Selected");
+        transactionTypeLabel.setFont(transactionTypeLabel.getFont().deriveFont(Font.BOLD, 16f));
         
-        budgetCurrencyLabel = new JLabel("Currency: MXN");
-        totalIncomeLabel = new JLabel("Total Income: $0.00");
-        totalIncomeLabel.setForeground(new Color(0, 128, 0));
+        transactionCategoryLabel = new JLabel("Category: -");
+        transactionAmountLabel = new JLabel("Amount: -");
+        transactionDateLabel = new JLabel("Date: -");
+        transactionCurrencyLabel = new JLabel("Currency: -");
+        transactionIdLabel = new JLabel("ID: -");
+        transactionIdLabel.setFont(transactionIdLabel.getFont().deriveFont(Font.PLAIN, 10f));
+        transactionIdLabel.setForeground(Color.GRAY);
         
-        totalExpensesLabel = new JLabel("Total Expenses: $0.00");
-        totalExpensesLabel.setForeground(new Color(128, 0, 0));
+        // Description area
+        transactionDescriptionArea = new JTextArea(4, 20);
+        transactionDescriptionArea.setLineWrap(true);
+        transactionDescriptionArea.setWrapStyleWord(true);
+        transactionDescriptionArea.setEditable(false);
+        transactionDescriptionArea.setBorder(BorderFactory.createLoweredBevelBorder());
+        transactionDescriptionArea.setBackground(getBackground());
+        transactionDescriptionArea.setText("No description available");
         
-        balanceLabel = new JLabel("Balance: $0.00");
-        balanceLabel.setFont(balanceLabel.getFont().deriveFont(Font.BOLD));
-        balanceLabel.setForeground(new Color(0, 0, 128));
-        
-        // Close button
+        // Action buttons
         closeButton = new JButton("×");
         closeButton.setPreferredSize(new Dimension(25, 25));
         closeButton.setToolTipText("Close details panel");
         closeButton.setFocusPainted(false);
         
-        // Transactions table
-        String[] columnNames = {"Type", "Category", "Amount", "Date", "Description"};
-        tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Make table read-only
-            }
-        };
+        editButton = new JButton("Edit Transaction");
+        editButton.setEnabled(false);
         
-        transactionsTable = new JTable(tableModel);
-        transactionsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        transactionsTable.setRowHeight(25);
-        
-        // Set column widths
-        transactionsTable.getColumnModel().getColumn(0).setPreferredWidth(80);  // Type
-        transactionsTable.getColumnModel().getColumn(1).setPreferredWidth(120); // Category
-        transactionsTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Amount
-        transactionsTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Date
-        transactionsTable.getColumnModel().getColumn(4).setPreferredWidth(200); // Description
+        deleteButton = new JButton("Delete Transaction");
+        deleteButton.setEnabled(false);
+        deleteButton.setForeground(new Color(128, 0, 0));
     }
     
     private void setupLayout() {
         setLayout(new BorderLayout());
-        setBorder(BorderFactory.createTitledBorder("Budget Details"));
+        setBorder(BorderFactory.createTitledBorder("Transaction Details"));
         setPreferredSize(new Dimension(300, 0));
         
         // Header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         
-        // Budget info panel
-        JPanel budgetInfoPanel = new JPanel(new GridBagLayout());
+        // Transaction info panel
+        JPanel transactionInfoPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(2, 5, 2, 5);
+        gbc.insets = new Insets(5, 10, 5, 10);
         
-        gbc.gridx = 0; gbc.gridy = 0;
-        budgetInfoPanel.add(budgetNameLabel, gbc);
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        transactionInfoPanel.add(transactionTypeLabel, gbc);
         
-        gbc.gridy = 1;
-        budgetInfoPanel.add(budgetCurrencyLabel, gbc);
+        gbc.gridy = 1; gbc.gridwidth = 1;
+        transactionInfoPanel.add(new JLabel("Category:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        transactionInfoPanel.add(transactionCategoryLabel, gbc);
         
-        gbc.gridy = 2;
-        budgetInfoPanel.add(totalIncomeLabel, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE;
+        transactionInfoPanel.add(new JLabel("Amount:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        transactionInfoPanel.add(transactionAmountLabel, gbc);
         
-        gbc.gridy = 3;
-        budgetInfoPanel.add(totalExpensesLabel, gbc);
+        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE;
+        transactionInfoPanel.add(new JLabel("Date:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        transactionInfoPanel.add(transactionDateLabel, gbc);
         
-        gbc.gridy = 4;
-        budgetInfoPanel.add(balanceLabel, gbc);
+        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE;
+        transactionInfoPanel.add(new JLabel("Currency:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        transactionInfoPanel.add(transactionCurrencyLabel, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.NONE;
+        transactionInfoPanel.add(transactionIdLabel, gbc);
         
         // Close button panel
         JPanel closePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         closePanel.add(closeButton);
         
-        headerPanel.add(budgetInfoPanel, BorderLayout.CENTER);
+        headerPanel.add(transactionInfoPanel, BorderLayout.CENTER);
         headerPanel.add(closePanel, BorderLayout.NORTH);
         
         add(headerPanel, BorderLayout.NORTH);
         
-        // Transactions panel
-        JPanel transactionsPanel = new JPanel(new BorderLayout());
-        transactionsPanel.setBorder(BorderFactory.createTitledBorder("Transactions"));
+        // Description panel
+        JPanel descriptionPanel = new JPanel(new BorderLayout());
+        descriptionPanel.setBorder(BorderFactory.createTitledBorder("Description"));
         
-        JScrollPane scrollPane = new JScrollPane(transactionsTable);
-        transactionsPanel.add(scrollPane, BorderLayout.CENTER);
+        JScrollPane descScrollPane = new JScrollPane(transactionDescriptionArea);
+        descScrollPane.setPreferredSize(new Dimension(280, 100));
+        descriptionPanel.add(descScrollPane, BorderLayout.CENTER);
         
-        // Transaction actions panel
-        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        add(descriptionPanel, BorderLayout.CENTER);
         
-        JButton addButton = new JButton("Add");
-        addButton.setToolTipText("Add new transaction");
+        // Action buttons panel
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        actionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
         
-        JButton editButton = new JButton("Edit");
-        editButton.setToolTipText("Edit selected transaction");
-        
-        JButton deleteButton = new JButton("Delete");
-        deleteButton.setToolTipText("Delete selected transaction");
-        
-        actionsPanel.add(addButton);
         actionsPanel.add(editButton);
         actionsPanel.add(deleteButton);
         
-        transactionsPanel.add(actionsPanel, BorderLayout.SOUTH);
-        
-        add(transactionsPanel, BorderLayout.CENTER);
+        add(actionsPanel, BorderLayout.SOUTH);
     }
     
     private void setupEventHandlers() {
         closeButton.addActionListener(e -> setVisible(false));
         
-        // Table selection listener
-        transactionsTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int selectedRow = transactionsTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    System.out.println("Selected transaction: " + tableModel.getValueAt(selectedRow, 4));
-                }
-            }
+        editButton.addActionListener(e -> {
+            System.out.println("Editing selected transaction");
+            // This would open a TransactionDialog with the current transaction data
+            TransactionDialog dialog = new TransactionDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this), 
+                "Edit Transaction", 
+                getCurrentTransactionData()
+            );
+            dialog.setVisible(true);
         });
         
-        // Double-click on table to edit
-        transactionsTable.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int selectedRow = transactionsTable.getSelectedRow();
-                    if (selectedRow >= 0) {
-                        System.out.println("Editing transaction: " + tableModel.getValueAt(selectedRow, 4));
-                        // Show edit dialog
-                    }
-                }
+        deleteButton.addActionListener(e -> {
+            int result = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this transaction?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
+            if (result == JOptionPane.YES_OPTION) {
+                System.out.println("Deleting selected transaction");
+                showNoSelectionState();
+                setVisible(false);
             }
         });
     }
     
-    private void populateWithSampleData() {
-        // Clear existing data
-        tableModel.setRowCount(0);
+    private void showNoSelectionState() {
+        transactionTypeLabel.setText("No Transaction Selected");
+        transactionTypeLabel.setForeground(Color.GRAY);
+        transactionCategoryLabel.setText("-");
+        transactionAmountLabel.setText("-");
+        transactionDateLabel.setText("-");
+        transactionCurrencyLabel.setText("-");
+        transactionIdLabel.setText("-");
+        transactionDescriptionArea.setText("Select a transaction from the table to view details");
         
-        // Add sample transactions
-        addTransactionRow("Income", "SALARY", "$3,500.00", "2025-01-01", "Monthly salary");
-        addTransactionRow("Income", "FREELANCE", "$500.00", "2025-01-15", "Freelance project");
-        addTransactionRow("Expense", "RENT_MORTGAGE", "$1,200.00", "2025-01-01", "Monthly rent");
-        addTransactionRow("Expense", "GROCERIES", "$300.00", "2025-01-05", "Weekly groceries");
-        addTransactionRow("Expense", "UTILITIES", "$150.00", "2025-01-10", "Electricity bill");
-        addTransactionRow("Expense", "TRANSPORTATION", "$200.00", "2025-01-12", "Gas and maintenance");
-        
-        updateSummary("Sample Budget", "MXN", 4000.00, 1850.00);
+        editButton.setEnabled(false);
+        deleteButton.setEnabled(false);
     }
     
-    private void addTransactionRow(String type, String category, String amount, String date, String description) {
-        Object[] row = {type, category, amount, date, description};
-        tableModel.addRow(row);
+    private Object getCurrentTransactionData() {
+        // In a real implementation, this would return the actual transaction object
+        // For now, return null to indicate mock data should be used
+        return new Object(); // Mock transaction data
     }
     
-    private void updateSummary(String budgetName, String currency, double totalIncome, double totalExpenses) {
-        budgetNameLabel.setText(budgetName);
-        budgetCurrencyLabel.setText("Currency: " + currency);
-        totalIncomeLabel.setText(String.format("Total Income: $%.2f", totalIncome));
-        totalExpensesLabel.setText(String.format("Total Expenses: $%.2f", totalExpenses));
-        
-        double balance = totalIncome - totalExpenses;
-        balanceLabel.setText(String.format("Balance: $%.2f", balance));
-        
-        // Update balance color based on value
-        if (balance > 0) {
-            balanceLabel.setForeground(new Color(0, 128, 0)); // Green for positive
-        } else if (balance < 0) {
-            balanceLabel.setForeground(new Color(128, 0, 0)); // Red for negative
+    /**
+     * Load transaction details for the specified transaction data.
+     * In a real implementation, this would display data from an actual Transaction object.
+     */
+    public void loadTransactionDetails(String type, String category, String amount, String date, String description) {
+        // Update transaction type with color coding
+        transactionTypeLabel.setText(type + " Transaction");
+        if ("Income".equals(type)) {
+            transactionTypeLabel.setForeground(new Color(0, 128, 0)); // Green
+            transactionAmountLabel.setForeground(new Color(0, 128, 0));
         } else {
-            balanceLabel.setForeground(new Color(0, 0, 128)); // Blue for zero
+            transactionTypeLabel.setForeground(new Color(128, 0, 0)); // Red  
+            transactionAmountLabel.setForeground(new Color(128, 0, 0));
+        }
+        
+        // Update transaction details
+        transactionCategoryLabel.setText(category);
+        transactionAmountLabel.setText(amount);
+        transactionDateLabel.setText(date);
+        transactionCurrencyLabel.setText("MXN"); // Default for now
+        transactionIdLabel.setText("ID: " + generateMockId());
+        
+        // Update description
+        if (description != null && !description.trim().isEmpty()) {
+            transactionDescriptionArea.setText(description);
+        } else {
+            transactionDescriptionArea.setText("No description provided");
+        }
+        
+        // Enable action buttons
+        editButton.setEnabled(true);
+        deleteButton.setEnabled(true);
+        
+        System.out.println("Loaded transaction details: " + type + " - " + category + " - " + amount);
+    }
+    
+    /**
+     * Load transaction details from table row data.
+     */
+    public void loadTransactionDetails(Object[] rowData) {
+        if (rowData != null && rowData.length >= 5) {
+            loadTransactionDetails(
+                (String) rowData[0], // Type
+                (String) rowData[1], // Category  
+                (String) rowData[2], // Amount
+                (String) rowData[3], // Date
+                (String) rowData[4]  // Description
+            );
         }
     }
     
-    /**
-     * Load budget details for the specified budget name.
-     * In a real implementation, this would fetch data from the repository.
-     */
-    public void loadBudgetDetails(String budgetName) {
-        System.out.println("Loading details for budget: " + budgetName);
-        
-        // Clear existing data
-        tableModel.setRowCount(0);
-        
-        // Mock different data based on budget name
-        if (budgetName.contains("January")) {
-            addTransactionRow("Income", "SALARY", "$3,500.00", "2025-01-01", "January salary");
-            addTransactionRow("Expense", "RENT_MORTGAGE", "$1,200.00", "2025-01-01", "January rent");
-            addTransactionRow("Expense", "GROCERIES", "$400.00", "2025-01-15", "January groceries");
-            updateSummary(budgetName, "MXN", 3500.00, 1600.00);
-        } else if (budgetName.contains("February")) {
-            addTransactionRow("Income", "SALARY", "$3,500.00", "2025-02-01", "February salary");
-            addTransactionRow("Income", "BUSINESS", "$800.00", "2025-02-15", "Consulting work");
-            addTransactionRow("Expense", "RENT_MORTGAGE", "$1,200.00", "2025-02-01", "February rent");
-            addTransactionRow("Expense", "UTILITIES", "$180.00", "2025-02-05", "February utilities");
-            updateSummary(budgetName, "MXN", 4300.00, 1380.00);
-        } else if (budgetName.contains("Vacation")) {
-            addTransactionRow("Expense", "TRAVEL", "$2,000.00", "2025-03-15", "Flight tickets");
-            addTransactionRow("Expense", "TRAVEL", "$1,500.00", "2025-03-20", "Hotel accommodation");
-            addTransactionRow("Expense", "DINING_OUT", "$800.00", "2025-03-21", "Vacation meals");
-            updateSummary(budgetName, "MXN", 0.00, 4300.00);
-        } else {
-            // Default data
-            populateWithSampleData();
-            updateSummary(budgetName, "MXN", 4000.00, 1850.00);
-        }
+    private String generateMockId() {
+        return "TXN-" + System.currentTimeMillis() % 100000;
     }
     
     /**
-     * Get the currently selected transaction row index.
+     * Clear transaction details and show no selection state.
      */
-    public int getSelectedTransactionIndex() {
-        return transactionsTable.getSelectedRow();
-    }
-    
-    /**
-     * Clear all transaction data.
-     */
-    public void clearTransactions() {
-        tableModel.setRowCount(0);
-        updateSummary("No Budget Selected", "MXN", 0.00, 0.00);
+    public void clearTransactionDetails() {
+        showNoSelectionState();
     }
 }

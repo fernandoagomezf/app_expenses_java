@@ -170,10 +170,11 @@ public class BudgetTreePanel extends JPanel {
     private void handleSelection(DefaultMutableTreeNode node) {
         String nodeText = node.toString();
         
-        // If it's a budget node, show details
+        // If it's a budget node, we could show some summary info, but for now just log
         if (isBudgetNode(node)) {
             System.out.println("Selected budget: " + nodeText);
-            mainWindow.showBudgetDetails(nodeText);
+            // Note: We don't automatically show details for budget selection anymore
+            // Details panel now shows transaction details when a transaction is selected
         }
     }
     
@@ -204,7 +205,11 @@ public class BudgetTreePanel extends JPanel {
             openTab.addActionListener(e -> mainWindow.openBudgetTab(node.toString()));
             
             JMenuItem showDetails = new JMenuItem("Show Details");
-            showDetails.addActionListener(e -> mainWindow.showBudgetDetails(node.toString()));
+            showDetails.addActionListener(e -> {
+                System.out.println("Showing details for budget: " + node.toString());
+                // For now, just open the budget tab since details panel shows transaction details
+                mainWindow.openBudgetTab(node.toString());
+            });
             
             JMenuItem addTransaction = new JMenuItem("Add Transaction");
             addTransaction.addActionListener(e -> {

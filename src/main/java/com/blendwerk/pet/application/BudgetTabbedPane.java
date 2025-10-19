@@ -35,9 +35,9 @@ public class BudgetTabbedPane extends JTabbedPane {
                 String tabTitle = getTitleAt(selectedIndex);
                 System.out.println("Selected tab: " + tabTitle);
                 
-                // Update details panel if it's not the welcome tab
+                // Clear transaction details when switching tabs since no transaction is selected
                 if (!tabTitle.equals("Welcome")) {
-                    mainWindow.showBudgetDetails(tabTitle);
+                    mainWindow.clearTransactionDetails();
                 }
             }
         });
@@ -235,8 +235,12 @@ public class BudgetTabbedPane extends JTabbedPane {
                 if (e.getClickCount() == 2) {
                     int selectedRow = table.getSelectedRow();
                     if (selectedRow >= 0) {
-                        System.out.println("Double-clicked transaction: " + tableModel.getValueAt(selectedRow, 4));
-                        mainWindow.showBudgetDetails(budgetName);
+                        Object[] rowData = new Object[tableModel.getColumnCount()];
+                        for (int i = 0; i < rowData.length; i++) {
+                            rowData[i] = tableModel.getValueAt(selectedRow, i);
+                        }
+                        System.out.println("Double-clicked transaction: " + rowData[4]);
+                        mainWindow.showTransactionDetails(rowData);
                     }
                 }
             }
@@ -247,7 +251,12 @@ public class BudgetTabbedPane extends JTabbedPane {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow >= 0) {
-                    System.out.println("Selected transaction in tab: " + tableModel.getValueAt(selectedRow, 4));
+                    Object[] rowData = new Object[tableModel.getColumnCount()];
+                    for (int i = 0; i < rowData.length; i++) {
+                        rowData[i] = tableModel.getValueAt(selectedRow, i);
+                    }
+                    System.out.println("Selected transaction in tab: " + rowData[4]);
+                    mainWindow.showTransactionDetails(rowData);
                 }
             }
         });

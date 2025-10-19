@@ -3,10 +3,7 @@ package com.blendwerk.pet.application;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Main application window for the Personal Expense Tracker.
@@ -321,11 +318,22 @@ public class MainWindow extends JFrame {
     }
     
     // Public methods for inter-component communication
-    public void showBudgetDetails(String budgetName) {
-        budgetDetailsPanel.loadBudgetDetails(budgetName);
+    public void showTransactionDetails(Object[] transactionData) {
+        budgetDetailsPanel.loadTransactionDetails(transactionData);
         if (!budgetDetailsPanel.isVisible()) {
             toggleDetailsPanel();
         }
+    }
+    
+    public void showTransactionDetails(String type, String category, String amount, String date, String description) {
+        budgetDetailsPanel.loadTransactionDetails(type, category, amount, date, description);
+        if (!budgetDetailsPanel.isVisible()) {
+            toggleDetailsPanel();
+        }
+    }
+    
+    public void clearTransactionDetails() {
+        budgetDetailsPanel.clearTransactionDetails();
     }
     
     public void openBudgetTab(String budgetName) {
