@@ -1,23 +1,26 @@
 package com.blendwerk.pet.application;
 
-import com.blendwerk.pet.domain.Budget;
-import com.blendwerk.pet.domain.Currency;
-import com.blendwerk.pet.domain.RepositoryException;
-import com.blendwerk.pet.infrastructure.FileBudgetRepository;
-import com.blendwerk.pet.infrastructure.FileStorage;
-import com.blendwerk.pet.infrastructure.MemoryCache;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Program {
     public static void main(String[] args) {
-        var budget = new Budget("Minino", Currency.MXN);
-        var cache = new MemoryCache();
-        var storage = new FileStorage();
-        var repository = new FileBudgetRepository(cache, storage);
-
         try {
-            repository.save(budget);
-        } catch (RepositoryException ex) {
+            SwingUtilities.invokeLater(() -> {
+                new Program();
+            });
+        } catch (Exception ex) {
+            System.out.println("The application has encountered an unrecoverable error and needs to close.");
+            System.out.println("Error details: " + ex.getMessage());
+            System.out.println("More details:");
             ex.printStackTrace();
         }
+    }
+
+    public Program() {
+        var mainFrame = new JFrame("Blendwerk Personal Expense Tracker");
+        mainFrame.setSize(1000, 800);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setVisible(true);
     }
 }
