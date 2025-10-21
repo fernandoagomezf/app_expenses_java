@@ -6,9 +6,7 @@ import javax.swing.UIManager;
 public class Program {
     public static void main(String[] args) {
         try {
-            // Set look and feel to system default
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());            
             SwingUtilities.invokeLater(() -> {
                 new Program();
             });

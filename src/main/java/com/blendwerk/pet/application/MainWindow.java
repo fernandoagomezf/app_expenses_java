@@ -1,84 +1,71 @@
 package com.blendwerk.pet.application;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JMenuBar;
+import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 
-/**
- * Main application window for the Personal Expense Tracker.
- * Follows standard Swing practices by extending JFrame and configuring components in constructor.
- */
 public class MainWindow extends JFrame {
-    private BudgetTreePanel budgetTreePanel;
-    private BudgetDetailsPanel budgetDetailsPanel;
-    private BudgetTabbedPane budgetTabbedPane;
-    private StatusBar statusBar;
-    private JSplitPane leftSplitPane;
-    private JSplitPane rightSplitPane;
+    private TreePanel _budgetTreePanel;
+    private DetailsPanel _budgetDetailsPanel;
+    private TabbedPane _budgetTabbedPane;
+    private StatusBar _statusBar;
+    private JMenuBar _menuBar;
+    private JToolBar _toolBar;
+    private JSplitPane _leftSplitPane;
+    private JSplitPane _rightSplitPane;
     
     public MainWindow() {
-        initializeComponents();
-        setupLayout();
-        setupEventHandlers();
-        
-        // Window properties
         setTitle("Blendwerk Personal Expense Tracker");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
-        // Set minimum size to prevent layout issues
-        setMinimumSize(new Dimension(800, 600));
+        setMinimumSize(new Dimension(920, 680));
+
+        initializeComponents();
     }
     
-    private void initializeComponents() {
-        // Initialize main panels
-        budgetTreePanel = new BudgetTreePanel(this);
-        budgetDetailsPanel = new BudgetDetailsPanel();
-        budgetTabbedPane = new BudgetTabbedPane(this);
-        statusBar = new StatusBar();
+    private void initializeComponents() {        
+        _budgetTreePanel = new TreePanel(this);
+        _budgetDetailsPanel = new DetailsPanel();
+        _budgetTabbedPane = new TabbedPane(this);
+        _statusBar = new StatusBar();
+        _menuBar = createMenuBar();
+        _toolBar = createToolBar();
+        _leftSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        _rightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+        _leftSplitPane.setLeftComponent(_budgetTreePanel);
+        _leftSplitPane.setRightComponent(_budgetTabbedPane);
+        _leftSplitPane.setDividerLocation(250);
+        _leftSplitPane.setOneTouchExpandable(true);                
         
-        // Menu bar
-        setJMenuBar(createMenuBar());
+        _rightSplitPane.setLeftComponent(_leftSplitPane);
+        _rightSplitPane.setRightComponent(_budgetDetailsPanel);
+        _rightSplitPane.setDividerLocation(900);
+        _rightSplitPane.setOneTouchExpandable(true);
         
-        // Toolbar
-        add(createToolBar(), BorderLayout.NORTH);
+        _budgetDetailsPanel.setVisible(true);
         
-        // Status bar
-        add(statusBar, BorderLayout.SOUTH);
-    }
-    
-    private void setupLayout() {
-        // Main content area with split panes
-        // Left: Budget tree, Center: Tabbed pane, Right: Details panel (initially hidden)
-        
-        leftSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        leftSplitPane.setLeftComponent(budgetTreePanel);
-        leftSplitPane.setRightComponent(budgetTabbedPane);
-        leftSplitPane.setDividerLocation(250);
-        leftSplitPane.setOneTouchExpandable(true);
-        
-        rightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        rightSplitPane.setLeftComponent(leftSplitPane);
-        rightSplitPane.setRightComponent(budgetDetailsPanel);
-        rightSplitPane.setDividerLocation(900);
-        rightSplitPane.setOneTouchExpandable(true);
-        
-        // Initially hide the details panel
-        budgetDetailsPanel.setVisible(false);
-        
-        add(rightSplitPane, BorderLayout.CENTER);
-    }
-    
-    private void setupEventHandlers() {
-        // Window close confirmation could be added here
+        setJMenuBar(_menuBar);
+        add(_toolBar, BorderLayout.NORTH);
+        add(_statusBar, BorderLayout.SOUTH);
+        add(_rightSplitPane, BorderLayout.CENTER);
     }
     
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         
-        // File Menu
         JMenu fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
         
@@ -108,7 +95,6 @@ public class MainWindow extends JFrame {
         exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(exitItem);
         
-        // Edit Menu
         JMenu editMenu = new JMenu("Edit");
         editMenu.setMnemonic(KeyEvent.VK_E);
         
@@ -136,7 +122,6 @@ public class MainWindow extends JFrame {
         settingsItem.addActionListener(e -> showSettings());
         editMenu.add(settingsItem);
         
-        // View Menu
         JMenu viewMenu = new JMenu("View");
         viewMenu.setMnemonic(KeyEvent.VK_V);
         
@@ -147,7 +132,6 @@ public class MainWindow extends JFrame {
         
         viewMenu.add(detailsItem);
         
-        // Window Menu
         JMenu windowMenu = new JMenu("Window");
         windowMenu.setMnemonic(KeyEvent.VK_W);
         
@@ -155,7 +139,6 @@ public class MainWindow extends JFrame {
         organizeBudgetsItem.addActionListener(e -> organizeBudgetTabs());
         windowMenu.add(organizeBudgetsItem);
         
-        // Help Menu
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);
         
@@ -176,27 +159,22 @@ public class MainWindow extends JFrame {
         JToolBar toolBar = new JToolBar("Main Toolbar");
         toolBar.setFloatable(false);
         
-        // New Budget
         JButton newButton = new JButton("New");
         newButton.setToolTipText("Create new budget");
         newButton.addActionListener(e -> createNewBudget());
         
-        // Open Budget
         JButton openButton = new JButton("Open");
         openButton.setToolTipText("Open budget");
         openButton.addActionListener(e -> openBudget());
         
-        // Add Transaction
         JButton addTransactionButton = new JButton("Add Transaction");
         addTransactionButton.setToolTipText("Add new transaction");
         addTransactionButton.addActionListener(e -> addTransaction());
         
-        // Settings
         JButton settingsButton = new JButton("Settings");
         settingsButton.setToolTipText("Application settings");
         settingsButton.addActionListener(e -> showSettings());
         
-        // Toggle Details
         JButton toggleDetailsButton = new JButton("Details");
         toggleDetailsButton.setToolTipText("Toggle details panel");
         toggleDetailsButton.addActionListener(e -> toggleDetailsPanel());
@@ -213,26 +191,25 @@ public class MainWindow extends JFrame {
         return toolBar;
     }
     
-    // Event handler methods
     private void createNewBudget() {
         System.out.println("Creating new budget...");
-        budgetTabbedPane.addNewBudgetTab("New Budget " + (budgetTabbedPane.getTabCount() + 1));
+        _budgetTabbedPane.addNewBudgetTab("New Budget " + (_budgetTabbedPane.getTabCount() + 1));
     }
     
     private void openBudget() {
         System.out.println("Opening budget...");
-        // Show file dialog (mock implementation)
+        
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             String fileName = fileChooser.getSelectedFile().getName();
-            budgetTabbedPane.addNewBudgetTab("Opened: " + fileName);
+            _budgetTabbedPane.addNewBudgetTab("Opened: " + fileName);
         }
     }
     
     private void closeCurrentBudget() {
         System.out.println("Closing current budget...");
-        budgetTabbedPane.closeCurrentTab();
+        _budgetTabbedPane.closeCurrentTab();
     }
     
     private void addTransaction() {
@@ -243,7 +220,7 @@ public class MainWindow extends JFrame {
     
     private void editTransaction() {
         System.out.println("Editing transaction...");
-        // Mock transaction data
+        
         TransactionDialog dialog = new TransactionDialog(this, "Edit Transaction", null);
         dialog.setVisible(true);
     }
@@ -269,19 +246,19 @@ public class MainWindow extends JFrame {
     }
     
     private void toggleDetailsPanel() {
-        boolean visible = budgetDetailsPanel.isVisible();
-        budgetDetailsPanel.setVisible(!visible);
+        boolean visible = _budgetDetailsPanel.isVisible();
+        _budgetDetailsPanel.setVisible(!visible);
         if (!visible) {
-            rightSplitPane.setDividerLocation(900);
+            _rightSplitPane.setDividerLocation(900);
         }
     }
     
     private void organizeBudgetTabs() {
         System.out.println("Organizing budget tabs...");
-        // Show dialog with list of open tabs
-        String[] tabs = new String[budgetTabbedPane.getTabCount()];
+        
+        String[] tabs = new String[_budgetTabbedPane.getTabCount()];
         for (int i = 0; i < tabs.length; i++) {
-            tabs[i] = budgetTabbedPane.getTitleAt(i);
+            tabs[i] = _budgetTabbedPane.getTitleAt(i);
         }
         
         if (tabs.length > 0) {
@@ -298,7 +275,7 @@ public class MainWindow extends JFrame {
             if (selected != null) {
                 for (int i = 0; i < tabs.length; i++) {
                     if (tabs[i].equals(selected)) {
-                        budgetTabbedPane.setSelectedIndex(i);
+                        _budgetTabbedPane.setSelectedIndex(i);
                         break;
                     }
                 }
@@ -319,24 +296,24 @@ public class MainWindow extends JFrame {
     
     // Public methods for inter-component communication
     public void showTransactionDetails(Object[] transactionData) {
-        budgetDetailsPanel.loadTransactionDetails(transactionData);
-        if (!budgetDetailsPanel.isVisible()) {
+        _budgetDetailsPanel.loadTransactionDetails(transactionData);
+        if (!_budgetDetailsPanel.isVisible()) {
             toggleDetailsPanel();
         }
     }
     
     public void showTransactionDetails(String type, String category, String amount, String date, String description) {
-        budgetDetailsPanel.loadTransactionDetails(type, category, amount, date, description);
-        if (!budgetDetailsPanel.isVisible()) {
+        _budgetDetailsPanel.loadTransactionDetails(type, category, amount, date, description);
+        if (!_budgetDetailsPanel.isVisible()) {
             toggleDetailsPanel();
         }
     }
     
     public void clearTransactionDetails() {
-        budgetDetailsPanel.clearTransactionDetails();
+        _budgetDetailsPanel.clearTransactionDetails();
     }
     
     public void openBudgetTab(String budgetName) {
-        budgetTabbedPane.addNewBudgetTab(budgetName);
+        _budgetTabbedPane.addNewBudgetTab(budgetName);
     }
 }
