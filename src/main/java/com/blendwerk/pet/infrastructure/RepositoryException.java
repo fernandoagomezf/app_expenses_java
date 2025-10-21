@@ -1,4 +1,4 @@
-package com.blendwerk.pet.domain;
+package com.blendwerk.pet.infrastructure;
 
 import java.lang.Exception;
 import java.lang.String;

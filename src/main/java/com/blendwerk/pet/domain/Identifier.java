@@ -4,8 +4,12 @@ import java.lang.IllegalArgumentException;
 import java.lang.String;
 import java.util.UUID;
 
-public record Identifier(UUID value) {
+public record Identifier(UUID value) implements ValueObject {
     public Identifier {
+        ensure();
+    }
+
+    public void ensure() {
         if (value == null) {
             throw new IllegalArgumentException("Identifier value cannot be null");
         }

@@ -12,7 +12,6 @@ import com.blendwerk.pet.domain.Budget;
 import com.blendwerk.pet.domain.Currency;
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.Money;
-import com.blendwerk.pet.domain.RepositoryException;
 import com.blendwerk.pet.domain.IncomeCategory;
 import com.blendwerk.pet.domain.ExpenseCategory;
 

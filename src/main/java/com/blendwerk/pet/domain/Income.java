@@ -5,8 +5,8 @@ public final class Income extends Transaction {
         super(budget);
     }
 
-    public Income(Identifier id, String category, Money amount) {
-        super(id, category, amount);
+    private Income() {
+        super();
     }
 
     public int sign() {
@@ -18,5 +18,11 @@ public final class Income extends Transaction {
             throw new IllegalArgumentException("Income category cannot be null.");
         }
         categorize(category.toString());
+    }
+
+    static Income of(Budget budget, Identifier id, Money amount, String category) {
+        var income = new Income();
+        Transaction.of(income, budget, id, category, amount);
+        return income;
     }
 }

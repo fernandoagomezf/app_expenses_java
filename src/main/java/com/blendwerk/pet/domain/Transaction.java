@@ -1,29 +1,53 @@
 package com.blendwerk.pet.domain;
 
-import java.lang.IllegalArgumentException;
 import java.lang.String;
 
 public abstract class Transaction implements Entity {
-    private final Identifier _id;
+    private Identifier _id;
+    private Budget _budget;
     private String _category;
     private Money _amount;
 
     protected Transaction(Budget budget) {
-        if (budget == null) {
-            throw new IllegalArgumentException("Transaction must be associated with a budget.");
-        }
+        _budget = budget;
         _id = Identifier.create();
         _category = CATEGORY_GENERAL;
-        _amount = Money.zero(budget.currency());
+        _amount = Money.zero(_budget.currency());
+        ensure();
     }
 
-    protected Transaction(Identifier id, String category, Money amount) {
-        if (id == null || category == null || category.isBlank() || amount == null) {
-            throw new IllegalArgumentException("Cannot reconstruct transaction from invalid arguments.");
+    protected Transaction() {        
+        _id = null;
+        _budget = null;
+        _category = null;
+        _amount = null;
+    }
+
+    static Transaction of(Transaction target, Budget budget, Identifier id, String category, Money amount) {
+        target._budget = budget;
+        target._id = id;
+        target._category = category;
+        target._amount = amount;
+        return target;
+    }
+
+    public void ensure() {
+        if (_budget == null) {
+            throw new DomainException("A transaction must be associated with a budget.");
         }
-        _id = id;
-        _category = category;
-        _amount = amount;
+        if (_amount == null) {
+            throw new DomainException("A transaction must have a valid amount.");
+        }
+        if (_category == null) {
+            throw new DomainException("A transaction must have a valid category.");
+        }
+        if (_amount.currency() != _budget.currency()) {
+            throw new DomainException("A transaction amount currency must match the budget currency.");
+        }
+    }
+
+    public final Budget budget() {
+        return _budget;
     }
 
     public final Identifier id() {
@@ -39,20 +63,13 @@ public abstract class Transaction implements Entity {
     }
 
     public void update(Money amount) {
-        if (amount == null) {
-            throw new IllegalArgumentException("Transaction amount cannot be null.");
-        }
-        if (amount.currency() != _amount.currency()) {
-            throw new IllegalArgumentException("Cannot replace an amount on another currency.");
-        }
         _amount = amount;
+        ensure();
     }
 
     public void categorize(String category) {
-        if (category == null) {
-            throw new IllegalArgumentException("Category cannot be null.");
-        }
         _category = category;
+        ensure();
     }
 
     public abstract int sign();

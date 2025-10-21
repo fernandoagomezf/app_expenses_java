@@ -68,6 +68,7 @@ public class MemoryCacheTests {
             public Identifier id() {
                 return _id;
             }
+            public void ensure() {}
         };
         // act
         cache.put(entity);
@@ -87,18 +88,21 @@ public class MemoryCacheTests {
             public Identifier id() {
                 return _id;
             }
+            public void ensure() {}
         };
         var entity2 = new Entity() {
             private final Identifier _id = Identifier.create();
             public Identifier id() {
                 return _id;
             }
+            public void ensure() {}
         };
         var entity3 = new Entity() {
             private final Identifier _id = Identifier.create();
             public Identifier id() {
                 return _id;
             }
+            public void ensure() {}
         };
         // act
         cache.put(entity1);
@@ -118,9 +122,8 @@ public class MemoryCacheTests {
         var cache = new MemoryCache();
         var entity = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         cache.put(entity);
         // act
@@ -149,9 +152,8 @@ public class MemoryCacheTests {
         var cache = new MemoryCache();
         var entity = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         cache.put(entity);
         // act
@@ -179,9 +181,8 @@ public class MemoryCacheTests {
         var cache = new MemoryCache();
         var entity = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         cache.put(entity);
         // act
@@ -199,9 +200,8 @@ public class MemoryCacheTests {
         var cache = new MemoryCache();
         var entity = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         cache.put(entity);
         // act
@@ -231,21 +231,18 @@ public class MemoryCacheTests {
         var cache = new MemoryCache(3);
         var entity1 = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         var entity2 = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         var entity3 = new Entity() {
             private final Identifier _id = Identifier.create();
-            public Identifier id() {
-                return _id;
-            }
+            public Identifier id() { return _id; }
+            public void ensure() {}
         };
         // act
         cache.put(entity1);

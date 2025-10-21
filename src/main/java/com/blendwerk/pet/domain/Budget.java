@@ -7,34 +7,37 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class Budget implements Entity {
-    private final Identifier _id;
+    private Identifier _id;
     private Currency _currency;
     private String _name;
     private final HashMap<Identifier, Transaction> _transactions;
 
     public Budget(String name, Currency currency) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Budget must have a name.");
-        }
         _id = Identifier.create();
         _name = name;
         _currency = currency;
         _transactions = new HashMap<>();
     }
 
-    public Budget(Identifier id, String name, Currency currency, Iterable<Transaction> transactions) {
-        if (id == null || name == null || name.isBlank() || currency == null || transactions == null) {
-            throw new IllegalArgumentException("Cannot reconstruct budget from invalid arguments.");
-        }
-        _id = id;
-        _name = name;
-        _currency = currency;
+    private Budget() {
+        _id = null;
+        _name = null;
+        _currency = null;
         _transactions = new HashMap<>();
-        for (var transaction : transactions) {
-            if (transaction.amount().currency() != currency) {
-                throw new IllegalArgumentException("Cannot reconstruct budget: transaction currency mismatch.");
-            }
-            _transactions.put(transaction.id(), transaction);
+    }
+
+    public void ensure() {
+        if (_id == null) {
+            throw new DomainException("A budget must have an ID.");
+        }
+        if (_name == null || _name.isBlank()) {
+            throw new DomainException("A budget must have a name.");
+        }
+        if (_currency == null) {
+            throw new DomainException("A budget must have a currency.");
+        }
+        for (var transaction : _transactions.values()) {
+            transaction.ensure();
         }
     }
 
@@ -51,38 +54,22 @@ public final class Budget implements Entity {
     }
 
     public Income credit(Money amount, IncomeCategory category) {
-        if (amount == null) {
-            throw new IllegalArgumentException("Amount cannot be null.");
-        }
-        if (category == null) {
-            throw new IllegalArgumentException("Category cannot be null.");
-        }
-        if (_currency != amount.currency()) {
-            throw new IllegalArgumentException("Amount currency must match the budget's.");
-        }
-
         var income = new Income(this);
         income.update(amount);
         income.categorize(category);
         _transactions.put(income.id(), income);
+        ensure();
+
         return income;   
     }
 
     public Expense debit(Money amount, ExpenseCategory category) {
-        if (amount == null) {
-            throw new IllegalArgumentException("Amount cannot be null.");
-        }
-        if (category == null) {
-            throw new IllegalArgumentException("Category cannot be null.");
-        }
-        if (_currency != amount.currency()) {
-            throw new IllegalArgumentException("Amount currency must match the budget's.");
-        }
-
         var expense = new Expense(this);
         expense.update(amount);
         expense.categorize(category);
         _transactions.put(expense.id(), expense);
+        ensure();
+        
         return expense;   
     }
 
@@ -117,10 +104,45 @@ public final class Budget implements Entity {
 
     public Money balance() {
         var zero = Money.zero(_currency);
-        var result = stream()
+        var result = _transactions
+        .values()
+        .stream()
         .map(Transaction::signedAmount)
         .reduce(zero, Money::add);        
 
         return result;
     }
+
+    
+    public static BudgetRebuilder rebuilder() {
+        return new BudgetRebuilder() {
+            private Budget _budget = new Budget();
+            
+            public BudgetRebuilder withId(String id) {
+                _budget._id = Identifier.of(id);
+                return this;
+            }
+
+            public BudgetRebuilder withProperties(String name, String currency) {
+                _budget._name = name;
+                _budget._currency = Currency.valueOf(currency);
+                return this;
+            }
+
+            public BudgetRebuilder withTransaction(String id, String category, String amount, String currency, int sign) {
+                var transactionId = Identifier.of(id);
+                var transactionAmount = Money.of(amount, Currency.valueOf(currency));
+                Transaction transaction = sign >= 0 ?
+                    Income.of(_budget, transactionId, transactionAmount, category) :
+                    Expense.of(_budget, transactionId, transactionAmount, category);
+                _budget._transactions.put(transactionId, transaction);
+                return this;
+            }
+
+            public Budget get() {
+                return _budget;
+            }
+        };
+    }
+
 }

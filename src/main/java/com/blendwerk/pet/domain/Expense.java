@@ -1,14 +1,12 @@
 package com.blendwerk.pet.domain;
 
-import java.lang.String;
-
 public final class Expense extends Transaction {
     public Expense(Budget budget) {
         super(budget);
     }
 
-    public Expense(Identifier id, String category, Money amount) {
-        super(id, category, amount);
+    private Expense() {
+        super();
     }
 
     public int sign() {
@@ -20,5 +18,11 @@ public final class Expense extends Transaction {
             throw new IllegalArgumentException("Expense category cannot be null.");
         }
         categorize(category.toString());
+    }
+
+    static Expense of(Budget budget, Identifier id, Money amount, String category) {
+        var expense = new Expense();
+        Transaction.of(expense, budget, id, category, amount);
+        return expense;
     }
 }
