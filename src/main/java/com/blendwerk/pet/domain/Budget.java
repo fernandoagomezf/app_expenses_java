@@ -154,9 +154,7 @@ public final class Budget implements Entity {
         return new BudgetView(
             _id,
             _name,
-            balance.currency(),
-            _transactions.size(),
-            balance.value().doubleValue()
+            balance
         );
     }
     

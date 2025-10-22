@@ -19,18 +19,20 @@ import com.blendwerk.pet.domain.ExpenseCategory;
 public class FileBudgetRepositoryTests {
     private Cache _mockCache;
     private Storage _mockStorage;
+    private StorageSummary _mockSummary;
 
     @BeforeEach
     public void setUp() {
         _mockCache = new MemoryCache();
         _mockStorage = new MockStorage();
+        _mockSummary = new MockStorageSummary();
     }
 
     @Test
     @DisplayName("ctor :: use valid parameters :: valid instance")
     public void ctor_validParameters_validInstance() {
         // arrange & act
-        var subject = new FileBudgetRepository(_mockCache, _mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, _mockStorage, _mockSummary);
         // assert
         Assertions.assertNotNull(subject);
     }
@@ -42,7 +44,7 @@ public class FileBudgetRepositoryTests {
         Cache nullCache = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new FileBudgetRepository(nullCache, _mockStorage);
+            new FileBudgetRepository(nullCache, _mockStorage, _mockSummary);
         });
     }
 
@@ -53,7 +55,18 @@ public class FileBudgetRepositoryTests {
         Storage nullStorage = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new FileBudgetRepository(_mockCache, nullStorage);
+            new FileBudgetRepository(_mockCache, nullStorage, _mockSummary);
+        });
+    }
+
+    @Test
+    @DisplayName("ctor :: use null summary :: throws exception")
+    public void ctor_nullSummary_throwsException() {
+        // arrange
+        StorageSummary nullSummary = null;
+        // act & assert
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new FileBudgetRepository(_mockCache, _mockStorage, nullSummary);
         });
     }
 
@@ -61,7 +74,7 @@ public class FileBudgetRepositoryTests {
     @DisplayName("get :: null id :: throws exception")
     public void get_nullId_throwsException() {
         // arrange
-        var subject = new FileBudgetRepository(_mockCache, _mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, _mockStorage, _mockSummary);
         Identifier nullId = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -75,7 +88,7 @@ public class FileBudgetRepositoryTests {
         // arrange
         var expectedBudget = new Budget("Test Budget", Currency.MXN);
         _mockCache.put(expectedBudget);
-        var subject = new FileBudgetRepository(_mockCache, _mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, _mockStorage, _mockSummary);
         // act
         var result = subject.get(expectedBudget.id());
         // assert
@@ -93,7 +106,7 @@ public class FileBudgetRepositoryTests {
         mockStorage.set("Budget", "Currency", "MXN");
         mockStorage.set("Budget", "TransactionCount", "0");
         mockStorage.set("Budget", "Balance", "0.00");
-        var subject = new FileBudgetRepository(_mockCache, mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, mockStorage, _mockSummary);
         // act
         var result = subject.get(budgetId);
         // assert
@@ -109,7 +122,7 @@ public class FileBudgetRepositoryTests {
         // arrange
         var budgetId = Identifier.create();
         var failingStorage = new FailingStorage();
-        var subject = new FileBudgetRepository(_mockCache, failingStorage);
+        var subject = new FileBudgetRepository(_mockCache, failingStorage, _mockSummary);
         // act & assert
         Assertions.assertThrows(RepositoryException.class, () -> {
             subject.get(budgetId);
@@ -122,7 +135,7 @@ public class FileBudgetRepositoryTests {
         // arrange
         var budget = new Budget("Test Budget", Currency.MXN);
         var mockStorage = new MockStorage();
-        var subject = new FileBudgetRepository(_mockCache, mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, mockStorage, _mockSummary);
         // act
         subject.save(budget);
         // assert
@@ -137,7 +150,7 @@ public class FileBudgetRepositoryTests {
     @DisplayName("save :: null budget :: throws exception")
     public void save_nullBudget_throwsException() {
         // arrange
-        var subject = new FileBudgetRepository(_mockCache, _mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, _mockStorage, _mockSummary);
         Budget nullBudget = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -153,7 +166,7 @@ public class FileBudgetRepositoryTests {
         var income = budget.credit(Money.of("1000.00", Currency.MXN), IncomeCategory.SALARY);
         var expense = budget.debit(Money.of("500.00", Currency.MXN), ExpenseCategory.RENT_MORTGAGE);
         var mockStorage = new MockStorage();
-        var subject = new FileBudgetRepository(_mockCache, mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, mockStorage, _mockSummary);
         // act
         subject.save(budget);
         // assert
@@ -172,7 +185,7 @@ public class FileBudgetRepositoryTests {
         var cache = new MemoryCache();
         cache.put(budget);
         var mockStorage = new MockStorage();
-        var subject = new FileBudgetRepository(cache, mockStorage);
+        var subject = new FileBudgetRepository(cache, mockStorage, _mockSummary);
         // act
         subject.delete(budget.id());
         // assert
@@ -184,7 +197,7 @@ public class FileBudgetRepositoryTests {
     @DisplayName("delete :: null id :: throws exception")
     public void delete_nullId_throwsException() {
         // arrange
-        var subject = new FileBudgetRepository(_mockCache, _mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, _mockStorage, _mockSummary);
         Identifier nullId = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -203,7 +216,7 @@ public class FileBudgetRepositoryTests {
         mockStorage.set("Budget", "Currency", "MXN");
         mockStorage.set("Budget", "TransactionCount", "0");
         mockStorage.set("Budget", "Balance", "0.00");
-        var subject = new FileBudgetRepository(_mockCache, mockStorage);
+        var subject = new FileBudgetRepository(_mockCache, mockStorage, _mockSummary);
         
         // act
         subject.get(budgetId);
@@ -213,7 +226,7 @@ public class FileBudgetRepositoryTests {
     }
 
     private class MockStorage implements Storage {
-        protected Map<String, java.util.Map<String, String>> _data = new HashMap<>();
+        protected Map<String, Map<String, String>> _data = new HashMap<>();
         private boolean _loadCalled = false;
         private boolean _saveCalled = false;
         private boolean _deleteCalled = false;
@@ -331,6 +344,34 @@ public class FileBudgetRepositoryTests {
 
         public boolean delete(UUID sourceId) {
             return false;
+        }
+    }
+
+    private class MockStorageSummary implements StorageSummary {
+        private boolean _loadCalled = false;
+
+        @SuppressWarnings("unused")
+        public boolean loadCalled() {
+            return _loadCalled;
+        }
+
+        public void track(String sectionName, String key) {
+            // Mock implementation - do nothing
+        }
+
+        public void load() throws StorageException {
+            _loadCalled = true;
+            // Mock implementation - do nothing
+        }
+
+        public String get(UUID sourceId, String key) {
+            // Mock implementation - return empty string
+            return "";
+        }
+
+        public Iterable<UUID> getSources() {
+            // Mock implementation - return empty list
+            return new ArrayList<>();
         }
     }
 }

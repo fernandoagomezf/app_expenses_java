@@ -38,11 +38,11 @@ public class FileStorageSummary implements StorageSummary {
         return Path.of(fileName);
     }
 
-    public void load() throws StorageException {
-        
+    public void load() throws StorageException {        
         var path = getPath();
     
         try {
+            _summary.clear();
             for (var file : path){
                 if (Files.isRegularFile(file) && file.toString().endsWith(".dat")) {
                     var storage = new FileStorage();
@@ -87,5 +87,9 @@ public class FileStorageSummary implements StorageSummary {
         }
         
         return result;
+    }
+
+    public Iterable<UUID> getSources() {
+        return _summary.keySet();
     }    
 }

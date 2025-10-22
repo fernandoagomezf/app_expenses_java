@@ -2,26 +2,64 @@ package com.blendwerk.pet.infrastructure;
 
 import java.lang.String;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Comparator;
 import com.blendwerk.pet.domain.Budget;
+import com.blendwerk.pet.domain.BudgetView;
 import com.blendwerk.pet.domain.Currency;
 import com.blendwerk.pet.domain.Identifier;
+import com.blendwerk.pet.domain.Money;
 import com.blendwerk.pet.domain.DomainException;
 import com.blendwerk.pet.domain.Transaction;
 
 public final class FileBudgetRepository {
     private final Cache _cache;
     private final Storage _storage;
+    private final StorageSummary _summary;
     
-    public FileBudgetRepository(Cache cache, Storage storage) {
+    public FileBudgetRepository(Cache cache, Storage storage, StorageSummary summary) {
         if (cache == null) {
             throw new IllegalArgumentException("Cache cannot be null.");
         }
         if (storage == null) {
             throw new IllegalArgumentException("Storage cannot be null.");
         }
+        if (summary == null) {
+            throw new IllegalArgumentException("Storage summary cannot be null.");
+        }
         _cache = cache;
         _storage = storage;
+        _summary = summary;  
+    }
+
+    public Iterable<BudgetView> getViews() throws RepositoryException {
+        var views = new ArrayList<BudgetView>();
+
+        try {
+            _summary.track("Budget", "ID");
+            _summary.track("Budget", "Name");
+            _summary.track("Budget", "Currency");
+            _summary.track("Budget", "Balance");
+            _summary.load();
+
+            for (var sourceId : _summary.getSources()) {
+                var idStr = _summary.get(sourceId, "ID");
+                var name = _summary.get(sourceId, "Name");
+                var currencyStr = _summary.get(sourceId, "Currency");
+                var balanceStr = _summary.get(sourceId, "Balance");
+
+                var id = Identifier.of(idStr);
+                var balance = Money.of(balanceStr, Currency.valueOf(currencyStr));
+                
+                var view = new BudgetView(id, name, balance);
+                views.add(view);
+            }
+        } catch (StorageException ex) {
+            throw new RepositoryException("Could not retrieve budget views: storage not available.", ex);
+        }
+
+        return views;
     }
 
     public Budget get(Identifier id) throws RepositoryException {
@@ -69,7 +107,8 @@ public final class FileBudgetRepository {
                 if (budget.stream().count() != count) {
                     throw new RepositoryException("Could not reconstruct a budget: transaction count mismatch.");
                 }
-                var balance = new BigDecimal(budgetBalance);
+                var balance = new BigDecimal(budgetBalance)
+                    .setScale(8, RoundingMode.HALF_UP);
                 if (budget.balance().value() != balance) {
                     throw new RepositoryException("Could not reconstruct a budget: balance mismatch.");
                 }
