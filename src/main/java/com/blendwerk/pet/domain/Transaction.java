@@ -7,6 +7,7 @@ public abstract class Transaction implements Entity {
     private Budget _budget;
     private String _category;
     private Money _amount;
+    private boolean _validated;
 
     protected Transaction(Budget budget) {
         if (budget == null) {
@@ -16,14 +17,18 @@ public abstract class Transaction implements Entity {
         _id = Identifier.create();
         _category = CATEGORY_GENERAL;
         _amount = Money.zero(_budget.currency());
+        
+        _validated = false;
         ensure();
     }
 
     protected Transaction() {        
-        _id = null;
         _budget = null;
+        _id = null;
         _category = null;
         _amount = null;
+
+        _validated = false;
     }
 
     static Transaction of(Transaction target, Budget budget, Identifier id, String category, Money amount) {
@@ -31,22 +36,29 @@ public abstract class Transaction implements Entity {
         target._id = id;
         target._category = category;
         target._amount = amount;
+        target._validated = false;
         return target;
     }
 
-    public void ensure() {
+    public final void ensure() {
+        if (_validated) {
+            return;
+        }
+
         if (_budget == null) {
-            throw new DomainException("A transaction must be associated with a budget.");
+            throw new IllegalStateException("A transaction must be associated with a budget.");
         }
-        if (_amount == null) {
-            throw new DomainException("A transaction must have a valid amount.");
+        if (_id == null || _id.isEmpty()) {
+            throw new IllegalStateException("A transaction must have a valid ID.");
         }
-        if (_category == null) {
-            throw new DomainException("A transaction must have a valid category.");
+        if (_amount == null || _category == null) {
+            throw new IllegalStateException("A transaction must have a valid amount.");
         }
         if (_amount.currency() != _budget.currency()) {
             throw new DomainException("A transaction amount currency must match the budget currency.");
         }
+
+        _validated = true;
     }
 
     public final Budget budget() {
@@ -66,12 +78,20 @@ public abstract class Transaction implements Entity {
     }
 
     public void update(Money amount) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null.");
+        }
         _amount = amount;
+        _validated = false;
         ensure();
     }
 
     public void categorize(String category) {
+        if (category == null || category.isBlank()) {
+            throw new IllegalArgumentException("Category cannot be null or blank.");
+        }
         _category = category;
+        _validated = false;
         ensure();
     }
 

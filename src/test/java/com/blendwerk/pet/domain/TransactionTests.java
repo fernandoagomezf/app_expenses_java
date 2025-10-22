@@ -66,7 +66,7 @@ public class TransactionTests {
         Transaction subject = new TestTransaction(budget);        
         Money amount = null;
         // act & assert
-        Assertions.assertThrows(DomainException.class, () -> {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             subject.update(amount);
         });
     }

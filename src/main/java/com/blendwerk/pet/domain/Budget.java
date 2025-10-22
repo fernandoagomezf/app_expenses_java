@@ -10,35 +10,55 @@ public final class Budget implements Entity {
     private Identifier _id;
     private Currency _currency;
     private String _name;
+    private boolean _validated;
     private final HashMap<Identifier, Transaction> _transactions;
 
     public Budget(String name, Currency currency) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Budget name cannot be null or blank.");
+        }
+        if (currency == null) {
+            throw new IllegalArgumentException("Budget currency cannot be null.");
+        }
+
         _id = Identifier.create();
         _name = name;
         _currency = currency;
         _transactions = new HashMap<>();
+        
+        _validated = false;
+        ensure();
     }
 
     private Budget() {
         _id = null;
         _name = null;
         _currency = null;
+        _validated = false;
         _transactions = new HashMap<>();
     }
 
+    private void invalidate() {
+        _validated = false;
+    }
+
     public void ensure() {
-        if (_id == null) {
-            throw new DomainException("A budget must have an ID.");
+        if (_validated) {
+            return;
         }
-        if (_name == null || _name.isBlank()) {
-            throw new DomainException("A budget must have a name.");
+
+        if (_id == null || _id.isEmpty()) {
+            throw new IllegalStateException("A budget must have a valid ID.");
         }
-        if (_currency == null) {
-            throw new DomainException("A budget must have a currency.");
+        if (_name == null || _currency == null || _transactions == null || _name.isBlank()) {
+            throw new IllegalStateException("A budget must have valid properties.");
         }
+        
         for (var transaction : _transactions.values()) {
             transaction.ensure();
         }
+
+        _validated = true;
     }
 
     public Identifier id() {
@@ -54,20 +74,38 @@ public final class Budget implements Entity {
     }
 
     public Income credit(Money amount, IncomeCategory category) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null.");
+        }
+
         var income = new Income(this);
         income.update(amount);
         income.categorize(category);
         _transactions.put(income.id(), income);
+        
+        invalidate();
         ensure();
 
         return income;   
     }
 
     public Expense debit(Money amount, ExpenseCategory category) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Amount cannot be null.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null.");
+        }
+
         var expense = new Expense(this);
         expense.update(amount);
         expense.categorize(category);
         _transactions.put(expense.id(), expense);
+        
+        invalidate();
         ensure();
         
         return expense;   
@@ -104,15 +142,12 @@ public final class Budget implements Entity {
 
     public Money balance() {
         var zero = Money.zero(_currency);
-        var result = _transactions
-        .values()
-        .stream()
+        var result = stream()
         .map(Transaction::signedAmount)
         .reduce(zero, Money::add);        
 
         return result;
     }
-
     
     public static BudgetRebuilder rebuilder() {
         return new BudgetRebuilder() {
