@@ -91,6 +91,8 @@ public class FileBudgetRepositoryTests {
         mockStorage.set("Budget", "ID", budgetId.value().toString());
         mockStorage.set("Budget", "Name", "Test Budget");
         mockStorage.set("Budget", "Currency", "MXN");
+        mockStorage.set("Budget", "TransactionCount", "0");
+        mockStorage.set("Budget", "Balance", "0.00");
         var subject = new FileBudgetRepository(_mockCache, mockStorage);
         // act
         var result = subject.get(budgetId);
@@ -199,6 +201,8 @@ public class FileBudgetRepositoryTests {
         mockStorage.set("Budget", "ID", budgetId.value().toString());
         mockStorage.set("Budget", "Name", "Test Budget");
         mockStorage.set("Budget", "Currency", "MXN");
+        mockStorage.set("Budget", "TransactionCount", "0");
+        mockStorage.set("Budget", "Balance", "0.00");
         var subject = new FileBudgetRepository(_mockCache, mockStorage);
         
         // act
