@@ -1,8 +1,10 @@
 package com.blendwerk.pet.infrastructure;
 
 import java.lang.String;
+import java.math.BigDecimal;
 import java.util.Comparator;
 import com.blendwerk.pet.domain.Budget;
+import com.blendwerk.pet.domain.Currency;
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.DomainException;
 import com.blendwerk.pet.domain.Transaction;
@@ -20,7 +22,7 @@ public final class FileBudgetRepository {
         }
         _cache = cache;
         _storage = storage;
-    }    
+    }
 
     public Budget get(Identifier id) throws RepositoryException {
         if (id == null) {
@@ -40,6 +42,9 @@ public final class FileBudgetRepository {
                 var budgetId = _storage.get("Budget", "ID");
                 var budgetName = _storage.get("Budget", "Name");
                 var budgetCurrency = _storage.get("Budget", "Currency");
+                var budgetTransactionCount = _storage.get("Budget", "TransactionCount");
+                var budgetBalance = _storage.get("Budget", "Balance");
+                
                 rebuilder.withId(budgetId)
                          .withProperties(budgetName, budgetCurrency);
 
@@ -59,6 +64,16 @@ public final class FileBudgetRepository {
                 }
                 
                 budget = rebuilder.get();
+                
+                var count = Integer.parseInt(budgetTransactionCount);
+                if (budget.stream().count() != count) {
+                    throw new RepositoryException("Could not reconstruct a budget: transaction count mismatch.");
+                }
+                var balance = new BigDecimal(budgetBalance);
+                if (budget.balance().value() != balance) {
+                    throw new RepositoryException("Could not reconstruct a budget: balance mismatch.");
+                }
+
                 _cache.put(budget);
             }
         } catch (StorageException ex) {
@@ -83,6 +98,8 @@ public final class FileBudgetRepository {
             _storage.set("Budget", "ID", budget.id().value().toString());
             _storage.set("Budget", "Name", budget.name());
             _storage.set("Budget", "Currency", budget.currency().toString());
+            _storage.set("Budget", "TransactionCount", String.valueOf(budget.stream().count()));
+            _storage.set("Budget", "Balance", String.valueOf(budget.balance().value()));
             
             var i = budget.stream()
                 .sorted(Comparator.comparing(Transaction::category))

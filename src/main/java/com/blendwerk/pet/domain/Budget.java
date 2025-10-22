@@ -186,6 +186,7 @@ public final class Budget implements Entity {
             }
 
             public Budget get() {
+                _budget.ensure();
                 return _budget;
             }
         };
