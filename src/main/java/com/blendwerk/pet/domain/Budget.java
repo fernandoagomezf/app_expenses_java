@@ -148,6 +148,17 @@ public final class Budget implements Entity {
 
         return result;
     }
+
+    public BudgetView asView() {
+        var balance = balance();
+        return new BudgetView(
+            _id,
+            _name,
+            balance.currency(),
+            _transactions.size(),
+            balance.value().doubleValue()
+        );
+    }
     
     public static BudgetRebuilder rebuilder() {
         return new BudgetRebuilder() {
