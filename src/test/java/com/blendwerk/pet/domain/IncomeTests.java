@@ -54,7 +54,7 @@ public class IncomeTests {
         var subject = new Income(budget);
         Money amount = null;
         // act & assert
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        Assertions.assertThrows(DomainException.class, () -> {
             subject.update(amount);
         });
     }

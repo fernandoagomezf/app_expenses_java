@@ -3,6 +3,7 @@ package com.blendwerk.pet.domain;
 public final class Expense extends Transaction {
     public Expense(Budget budget) {
         super(budget);
+        ensure();
     }
 
     private Expense() {

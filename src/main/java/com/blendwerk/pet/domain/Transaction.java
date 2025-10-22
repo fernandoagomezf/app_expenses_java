@@ -9,6 +9,9 @@ public abstract class Transaction implements Entity {
     private Money _amount;
 
     protected Transaction(Budget budget) {
+        if (budget == null) {
+            throw new IllegalArgumentException("Budget cannot be null.");
+        }
         _budget = budget;
         _id = Identifier.create();
         _category = CATEGORY_GENERAL;

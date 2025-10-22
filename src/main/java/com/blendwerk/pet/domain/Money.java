@@ -7,23 +7,19 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public record Money(BigDecimal value, Currency currency) implements ValueObject {
+public record Money(BigDecimal value, Currency currency) implements ValueObject<Money> {
     public static final int INTERNAL_SCALE = 8;
     public static final int DISPLAY_SCALE = 2;
 
     public Money {
-        ensure();
-        if (value.scale() != INTERNAL_SCALE) {
-            value = value.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
-        }
-    }
-
-    public void ensure() {
         if (currency == null) {
             throw new DomainException("A money value must have a valid currency.");
         }
         if (value == null) {
             throw new IllegalArgumentException("A money value must have a valid amount.");
+        }
+        if (value.scale() != INTERNAL_SCALE) {
+            value = value.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
         }
     }
     

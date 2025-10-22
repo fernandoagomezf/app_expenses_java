@@ -12,6 +12,7 @@ public class TransactionTests {
         TestTransaction(Budget budget) {
             super(budget);
             _sign = 1;
+            ensure();
         }
 
         public int sign() {
@@ -65,7 +66,7 @@ public class TransactionTests {
         Transaction subject = new TestTransaction(budget);        
         Money amount = null;
         // act & assert
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        Assertions.assertThrows(DomainException.class, () -> {
             subject.update(amount);
         });
     }

@@ -1,5 +1,5 @@
 package com.blendwerk.pet.domain;
 
-public interface ValueObject {
-    void ensure();
+public interface ValueObject<T extends Record> {
+    
 }
