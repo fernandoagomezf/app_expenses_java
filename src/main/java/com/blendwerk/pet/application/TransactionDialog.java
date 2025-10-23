@@ -1,8 +1,8 @@
 package com.blendwerk.pet.application;
 
-import com.blendwerk.pet.domain.Currency;
-import com.blendwerk.pet.domain.ExpenseCategory;
-import com.blendwerk.pet.domain.IncomeCategory;
+import com.blendwerk.pet.domain.budgeting.Currency;
+import com.blendwerk.pet.domain.budgeting.ExpenseCategory;
+import com.blendwerk.pet.domain.budgeting.IncomeCategory;
 
 import javax.swing.*;
 import java.awt.*;

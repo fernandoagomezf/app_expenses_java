@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.blendwerk.pet.domain.budgeting.Currency;
+import com.blendwerk.pet.domain.budgeting.Money;
+
 import org.junit.jupiter.api.Assertions;
 
 @DisplayName("PET::Domain::Money record")

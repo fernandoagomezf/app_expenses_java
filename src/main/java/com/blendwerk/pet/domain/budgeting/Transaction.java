@@ -1,6 +1,10 @@
-package com.blendwerk.pet.domain;
+package com.blendwerk.pet.domain.budgeting;
 
 import java.lang.String;
+
+import com.blendwerk.pet.domain.DomainException;
+import com.blendwerk.pet.domain.Entity;
+import com.blendwerk.pet.domain.Identifier;
 
 public abstract class Transaction implements Entity {
     private Identifier _id;

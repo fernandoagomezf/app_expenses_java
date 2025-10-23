@@ -1,4 +1,4 @@
-package com.blendwerk.pet.domain;
+package com.blendwerk.pet.domain.budgeting;
 
 public interface BudgetRebuilder {
     BudgetRebuilder withId(String id);

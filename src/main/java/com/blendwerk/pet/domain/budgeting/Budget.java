@@ -1,10 +1,13 @@
-package com.blendwerk.pet.domain;
+package com.blendwerk.pet.domain.budgeting;
 
 import java.lang.String;
 import java.lang.IllegalArgumentException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import com.blendwerk.pet.domain.Entity;
+import com.blendwerk.pet.domain.Identifier;
 
 public final class Budget implements Entity {
     private Identifier _id;

@@ -3,6 +3,13 @@ package com.blendwerk.pet.domain;
 import java.lang.IllegalArgumentException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.blendwerk.pet.domain.budgeting.Budget;
+import com.blendwerk.pet.domain.budgeting.Currency;
+import com.blendwerk.pet.domain.budgeting.Expense;
+import com.blendwerk.pet.domain.budgeting.ExpenseCategory;
+import com.blendwerk.pet.domain.budgeting.Money;
+
 import org.junit.jupiter.api.Assertions;
 
 

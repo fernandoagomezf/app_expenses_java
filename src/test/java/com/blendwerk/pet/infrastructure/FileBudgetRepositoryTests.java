@@ -8,12 +8,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import com.blendwerk.pet.domain.Budget;
-import com.blendwerk.pet.domain.Currency;
+
 import com.blendwerk.pet.domain.Identifier;
-import com.blendwerk.pet.domain.Money;
-import com.blendwerk.pet.domain.IncomeCategory;
-import com.blendwerk.pet.domain.ExpenseCategory;
+import com.blendwerk.pet.domain.budgeting.Budget;
+import com.blendwerk.pet.domain.budgeting.Currency;
+import com.blendwerk.pet.domain.budgeting.ExpenseCategory;
+import com.blendwerk.pet.domain.budgeting.IncomeCategory;
+import com.blendwerk.pet.domain.budgeting.Money;
 
 @DisplayName("PET::Infrastructure::FileBudgetRepository class")
 public class FileBudgetRepositoryTests {
