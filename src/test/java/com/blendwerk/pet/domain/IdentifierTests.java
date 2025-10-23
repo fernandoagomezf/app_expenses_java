@@ -3,6 +3,9 @@ package com.blendwerk.pet.domain;
 import java.lang.IllegalArgumentException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.blendwerk.pet.domain.core.Identifier;
+
 import org.junit.jupiter.api.Assertions;
 import java.util.UUID;
 

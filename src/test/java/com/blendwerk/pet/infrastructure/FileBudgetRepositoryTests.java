@@ -9,12 +9,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
-import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.budgeting.Budget;
 import com.blendwerk.pet.domain.budgeting.Currency;
 import com.blendwerk.pet.domain.budgeting.ExpenseCategory;
 import com.blendwerk.pet.domain.budgeting.IncomeCategory;
 import com.blendwerk.pet.domain.budgeting.Money;
+import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.repositories.FileBudgetRepository;
 import com.blendwerk.pet.infrastructure.repositories.RepositoryException;
 import com.blendwerk.pet.infrastructure.services.Cache;

@@ -2,9 +2,9 @@ package com.blendwerk.pet.domain.budgeting;
 
 import java.lang.String;
 
-import com.blendwerk.pet.domain.DomainException;
-import com.blendwerk.pet.domain.Entity;
-import com.blendwerk.pet.domain.Identifier;
+import com.blendwerk.pet.domain.core.DomainException;
+import com.blendwerk.pet.domain.core.Entity;
+import com.blendwerk.pet.domain.core.Identifier;
 
 public abstract class Transaction implements Entity {
     private Identifier _id;

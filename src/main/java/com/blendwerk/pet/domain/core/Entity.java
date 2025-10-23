@@ -1,4 +1,4 @@
-package com.blendwerk.pet.domain;
+package com.blendwerk.pet.domain.core;
 
 public interface Entity {
     Identifier id();

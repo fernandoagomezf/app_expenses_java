@@ -7,8 +7,8 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import com.blendwerk.pet.domain.DomainException;
-import com.blendwerk.pet.domain.ValueObject;
+import com.blendwerk.pet.domain.core.DomainException;
+import com.blendwerk.pet.domain.core.ValueObject;
 
 public record Money(BigDecimal value, Currency currency) implements ValueObject<Money> {
     public static final int INTERNAL_SCALE = 8;

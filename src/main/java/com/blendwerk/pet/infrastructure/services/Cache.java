@@ -1,7 +1,7 @@
 package com.blendwerk.pet.infrastructure.services;
 
-import com.blendwerk.pet.domain.Entity;
-import com.blendwerk.pet.domain.Identifier;
+import com.blendwerk.pet.domain.core.Entity;
+import com.blendwerk.pet.domain.core.Identifier;
 
 public interface Cache {
     int size();

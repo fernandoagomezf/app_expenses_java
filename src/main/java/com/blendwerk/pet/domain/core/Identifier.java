@@ -1,4 +1,4 @@
-package com.blendwerk.pet.domain;
+package com.blendwerk.pet.domain.core;
 
 import java.lang.IllegalArgumentException;
 import java.lang.String;

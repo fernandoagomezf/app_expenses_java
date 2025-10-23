@@ -1,8 +1,9 @@
 package com.blendwerk.pet.infrastructure.services;
 
 import java.util.LinkedHashMap;
-import com.blendwerk.pet.domain.Entity;
-import com.blendwerk.pet.domain.Identifier;
+
+import com.blendwerk.pet.domain.core.Entity;
+import com.blendwerk.pet.domain.core.Identifier;
 
 public class MemoryCache implements Cache {
     private static final int DEFAULT_MAX_SIZE = 10;

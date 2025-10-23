@@ -1,6 +1,6 @@
 package com.blendwerk.pet.domain.budgeting;
 
-import com.blendwerk.pet.domain.Identifier;
+import com.blendwerk.pet.domain.core.Identifier;
 
 public final class Expense extends Transaction {
     public Expense(Budget budget) {

@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.blendwerk.pet.domain.Entity;
-import com.blendwerk.pet.domain.Identifier;
+import com.blendwerk.pet.domain.core.Entity;
+import com.blendwerk.pet.domain.core.Identifier;
 
 public final class Budget implements Entity {
     private Identifier _id;

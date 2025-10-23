@@ -3,10 +3,10 @@ package com.blendwerk.pet.application.services;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.budgeting.Budget;
 import com.blendwerk.pet.domain.budgeting.BudgetView;
 import com.blendwerk.pet.domain.budgeting.Currency;
+import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.repositories.BudgetRepository;
 
 public class BudgetingService {

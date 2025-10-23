@@ -3,8 +3,9 @@ package com.blendwerk.pet.infrastructure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import com.blendwerk.pet.domain.Entity;
-import com.blendwerk.pet.domain.Identifier;
+
+import com.blendwerk.pet.domain.core.Entity;
+import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.services.MemoryCache;
 
 @DisplayName("PET::Infrastructure::MemoryCache class")
