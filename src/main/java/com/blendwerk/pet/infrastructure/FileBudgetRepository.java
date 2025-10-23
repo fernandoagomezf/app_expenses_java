@@ -13,7 +13,7 @@ import com.blendwerk.pet.domain.Money;
 import com.blendwerk.pet.domain.DomainException;
 import com.blendwerk.pet.domain.Transaction;
 
-public final class FileBudgetRepository {
+public final class FileBudgetRepository implements BudgetRepository {
     private final Cache _cache;
     private final Storage _storage;
     private final StorageSummary _summary;
