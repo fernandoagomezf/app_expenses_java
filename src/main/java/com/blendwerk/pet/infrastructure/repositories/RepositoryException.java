@@ -1,4 +1,4 @@
-package com.blendwerk.pet.infrastructure;
+package com.blendwerk.pet.infrastructure.repositories;
 
 import java.lang.Exception;
 import java.lang.String;

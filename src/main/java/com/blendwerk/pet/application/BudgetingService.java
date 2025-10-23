@@ -7,7 +7,7 @@ import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.budgeting.Budget;
 import com.blendwerk.pet.domain.budgeting.BudgetView;
 import com.blendwerk.pet.domain.budgeting.Currency;
-import com.blendwerk.pet.infrastructure.BudgetRepository;
+import com.blendwerk.pet.infrastructure.repositories.BudgetRepository;
 
 public class BudgetingService {
     private final BudgetRepository _budgetRepository;

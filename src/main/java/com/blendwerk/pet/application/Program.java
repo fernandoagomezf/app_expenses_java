@@ -3,10 +3,10 @@ package com.blendwerk.pet.application;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.blendwerk.pet.infrastructure.FileBudgetRepository;
-import com.blendwerk.pet.infrastructure.FileStorage;
-import com.blendwerk.pet.infrastructure.FileStorageSummary;
-import com.blendwerk.pet.infrastructure.MemoryCache;
+import com.blendwerk.pet.infrastructure.repositories.FileBudgetRepository;
+import com.blendwerk.pet.infrastructure.services.FileStorage;
+import com.blendwerk.pet.infrastructure.services.FileStorageSummary;
+import com.blendwerk.pet.infrastructure.services.MemoryCache;
 
 public class Program {
     public static void main(String[] args) {

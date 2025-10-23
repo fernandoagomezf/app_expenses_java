@@ -1,4 +1,4 @@
-package com.blendwerk.pet.infrastructure;
+package com.blendwerk.pet.infrastructure.services;
 
 import java.util.LinkedHashMap;
 import com.blendwerk.pet.domain.Entity;

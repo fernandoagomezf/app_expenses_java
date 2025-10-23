@@ -1,4 +1,4 @@
-package com.blendwerk.pet.infrastructure;
+package com.blendwerk.pet.infrastructure.repositories;
 
 import java.lang.String;
 import java.math.BigDecimal;
@@ -13,6 +13,10 @@ import com.blendwerk.pet.domain.budgeting.BudgetView;
 import com.blendwerk.pet.domain.budgeting.Currency;
 import com.blendwerk.pet.domain.budgeting.Money;
 import com.blendwerk.pet.domain.budgeting.Transaction;
+import com.blendwerk.pet.infrastructure.services.Cache;
+import com.blendwerk.pet.infrastructure.services.Storage;
+import com.blendwerk.pet.infrastructure.services.StorageException;
+import com.blendwerk.pet.infrastructure.services.StorageSummary;
 
 public final class FileBudgetRepository implements BudgetRepository {
     private final Cache _cache;

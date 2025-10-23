@@ -1,4 +1,4 @@
-package com.blendwerk.pet.infrastructure;
+package com.blendwerk.pet.infrastructure.repositories;
 
 import com.blendwerk.pet.domain.Identifier;
 import com.blendwerk.pet.domain.budgeting.Budget;

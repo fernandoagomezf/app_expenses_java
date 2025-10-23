@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import com.blendwerk.pet.domain.Entity;
 import com.blendwerk.pet.domain.Identifier;
+import com.blendwerk.pet.infrastructure.services.MemoryCache;
 
 @DisplayName("PET::Infrastructure::MemoryCache class")
 public class MemoryCacheTests {

@@ -1,4 +1,4 @@
-package com.blendwerk.pet.infrastructure;
+package com.blendwerk.pet.infrastructure.services;
 
 public class StorageException extends Exception {
     public StorageException(String message, Throwable cause) {
