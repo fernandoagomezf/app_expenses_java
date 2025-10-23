@@ -43,7 +43,7 @@ public class FileStorageSummary implements StorageSummary {
     
         try {
             _summary.clear();
-            for (var file : path){
+            for (var file : Files.list(path).toList()){
                 if (Files.isRegularFile(file) && file.toString().endsWith(".dat")) {
                     var storage = new FileStorage();
     
