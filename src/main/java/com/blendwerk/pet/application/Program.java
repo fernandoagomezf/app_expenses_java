@@ -26,16 +26,22 @@ public class Program {
     }
 
     public Program() {       
+        // Infrastructure Layer
         var cache = new MemoryCache();
         var storage = new FileStorage();
         var summary = new FileStorageSummary();
         var budgetRepository = new FileBudgetRepository(cache, storage, summary);
+        
+        // Application Services Layer
         var budgetingService = new BudgetingService(budgetRepository);
-        System.out.println(budgetingService.toString());
-
-        MainWindow mainWindow = new MainWindow();
+        
+        // Model Layer (MVC)
+        var budgetModel = new com.blendwerk.pet.application.models.BudgetModel(budgetingService);
+        
+        // View Layer with MVC Controllers
+        MainWindow mainWindow = new MainWindow(budgetModel);
         mainWindow.setVisible(true);
         
-        System.out.println("Personal Expense Tracker started.");
+        System.out.println("Personal Expense Tracker started with MVC architecture.");
     }
 }

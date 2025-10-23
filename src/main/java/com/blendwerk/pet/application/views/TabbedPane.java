@@ -91,15 +91,8 @@ public class TabbedPane extends JTabbedPane {
         
         var newBudgetButton = new JButton("Create New Budget");
         newBudgetButton.addActionListener(e -> {
-            String budgetName = JOptionPane.showInputDialog(
-                this,
-                "Enter budget name:",
-                "Create New Budget",
-                JOptionPane.PLAIN_MESSAGE
-            );
-            if (budgetName != null && !budgetName.trim().isEmpty()) {
-                addNewBudgetTab(budgetName.trim());
-            }
+            // Delegate to MainWindow to create new budget with proper MVC flow
+            _mainWindow.createNewBudgetFromTabbedPane();
         });
         
         var openBudgetButton = new JButton("Open Budget");
@@ -406,5 +399,158 @@ public class TabbedPane extends JTabbedPane {
                 setSelectedIndex(0);
             }
         }
+    }
+    
+    // MVC Methods for Controller integration
+    public boolean hasTab(String budgetName) {
+        for (int i = 0; i < getTabCount(); i++) {
+            if (getTitleAt(i).equals(budgetName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void selectTab(String budgetName) {
+        for (int i = 0; i < getTabCount(); i++) {
+            if (getTitleAt(i).equals(budgetName)) {
+                setSelectedIndex(i);
+                return;
+            }
+        }
+    }
+    
+    public void addBudgetTab(String budgetName, com.blendwerk.pet.domain.budgeting.Budget budget) {
+        // Check if tab already exists
+        if (hasTab(budgetName)) {
+            selectTab(budgetName);
+            return;
+        }
+        
+        var budgetPanel = createBudgetPanelWithData(budgetName, budget);
+        
+        // Create tab with close button
+        addTab(budgetName, budgetPanel);
+        var tabIndex = getTabCount() - 1;
+        setTabComponentAt(tabIndex, createTabHeader(budgetName, tabIndex));
+        setToolTipTextAt(tabIndex, "Budget: " + budgetName);
+        setSelectedIndex(tabIndex);
+    }
+    
+    public void closeTab(String budgetName) {
+        for (int i = 0; i < getTabCount(); i++) {
+            if (getTitleAt(i).equals(budgetName)) {
+                closeTabAt(i);
+                return;
+            }
+        }
+    }
+    
+    public void showError(String message) {
+        javax.swing.JOptionPane.showMessageDialog(this, message, "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
+    
+    public void showCreateBudgetDialog() {
+        // Delegate to MainWindow for proper MVC flow
+        _mainWindow.createNewBudgetFromTabbedPane();
+    }
+    
+    private JPanel createBudgetPanelWithData(String budgetName, com.blendwerk.pet.domain.budgeting.Budget budget) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Budget summary panel
+        JPanel summaryPanel = createBudgetSummaryPanelWithData(budgetName, budget);
+        panel.add(summaryPanel, BorderLayout.NORTH);
+        
+        // Transactions table with real data
+        var transactionsTable = createTransactionsTableWithData(budgetName, budget);
+        var scrollPane = new JScrollPane(transactionsTable);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Transactions"));
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        // Actions panel
+        var actionsPanel = createActionsPanel(budgetName, transactionsTable);
+        panel.add(actionsPanel, BorderLayout.SOUTH);
+        
+        return panel;
+    }
+    
+    private JPanel createBudgetSummaryPanelWithData(String budgetName, com.blendwerk.pet.domain.budgeting.Budget budget) {
+        var summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        summaryPanel.setBorder(BorderFactory.createTitledBorder("Budget Summary"));
+        
+        // Calculate totals from transactions
+        var zero = com.blendwerk.pet.domain.budgeting.Money.zero(budget.currency());
+        var totalIncome = budget.stream()
+            .filter(t -> t instanceof com.blendwerk.pet.domain.budgeting.Income)
+            .map(t -> t.amount())
+            .reduce(zero, com.blendwerk.pet.domain.budgeting.Money::add);
+        
+        var totalExpenses = budget.stream()
+            .filter(t -> t instanceof com.blendwerk.pet.domain.budgeting.Expense)
+            .map(t -> t.amount())
+            .reduce(zero, com.blendwerk.pet.domain.budgeting.Money::add);
+        
+        var incomeLabel = new JLabel("Total Income: " + totalIncome);
+        var expensesLabel = new JLabel("Total Expenses: " + totalExpenses);
+        var balanceLabel = new JLabel("Balance: " + budget.balance());
+        
+        summaryPanel.add(incomeLabel);
+        summaryPanel.add(new JLabel("  |  "));
+        summaryPanel.add(expensesLabel);
+        summaryPanel.add(new JLabel("  |  "));
+        summaryPanel.add(balanceLabel);
+        
+        return summaryPanel;
+    }
+    
+    private JTable createTransactionsTableWithData(String budgetName, com.blendwerk.pet.domain.budgeting.Budget budget) {
+        String[] columnNames = {"Type", "Category", "Amount", "Currency", "Date", "Description"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        // Add real transactions from budget
+        budget.stream().forEach(transaction -> {
+            Object[] row = new Object[6];
+            if (transaction instanceof com.blendwerk.pet.domain.budgeting.Income) {
+                var income = (com.blendwerk.pet.domain.budgeting.Income) transaction;
+                row[0] = "Income";
+                row[1] = income.category().toString();
+            } else if (transaction instanceof com.blendwerk.pet.domain.budgeting.Expense) {
+                var expense = (com.blendwerk.pet.domain.budgeting.Expense) transaction;
+                row[0] = "Expense";
+                row[1] = expense.category().toString();
+            }
+            row[2] = transaction.amount().toString();
+            row[3] = budget.currency().toString();
+            row[4] = "N/A"; // TODO: Add date when implemented
+            row[5] = "N/A"; // TODO: Add description when implemented
+            
+            model.addRow(row);
+        });
+        
+        var table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Add selection listener for details panel integration
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0) {
+                    Object[] rowData = new Object[table.getColumnCount()];
+                    for (int i = 0; i < table.getColumnCount(); i++) {
+                        rowData[i] = table.getValueAt(selectedRow, i);
+                    }
+                    _mainWindow.showTransactionDetails(rowData);
+                }
+            }
+        });
+        
+        return table;
     }
 }

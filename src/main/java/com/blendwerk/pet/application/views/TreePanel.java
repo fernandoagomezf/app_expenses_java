@@ -217,4 +217,52 @@ public class TreePanel extends JPanel {
         _treeModel.reload();
         expandAllNodes();
     }
+    
+    // MVC Methods for Controller integration
+    public void updateBudgetTree(Iterable<com.blendwerk.pet.domain.budgeting.BudgetView> budgetViews) {
+        // Clear existing data
+        _rootNode.removeAllChildren();
+        
+        // Add budgets from service
+        for (var budgetView : budgetViews) {
+            var budgetNode = new DefaultMutableTreeNode(budgetView.name());
+            
+            // Add income, expenses, and balance nodes
+            var balance = budgetView.balance();
+            var incomeNode = new DefaultMutableTreeNode("Income: " + balance.toString());
+            var expenseNode = new DefaultMutableTreeNode("Expenses: $0.00"); // TODO: Get from service
+            var balanceNode = new DefaultMutableTreeNode("Balance: " + balance.toString());
+            
+            budgetNode.add(incomeNode);
+            budgetNode.add(expenseNode);
+            budgetNode.add(balanceNode);
+            
+            _rootNode.add(budgetNode);
+        }
+        
+        // Refresh the tree display
+        _treeModel.reload();
+        expandAllNodes();
+    }
+    
+    public void addBudgetNode(String budgetName, String balance) {
+        var budgetNode = new DefaultMutableTreeNode(budgetName);
+        
+        // Add sub-nodes
+        var incomeNode = new DefaultMutableTreeNode("Income: $0.00");
+        var expenseNode = new DefaultMutableTreeNode("Expenses: $0.00");
+        var balanceNode = new DefaultMutableTreeNode("Balance: " + balance);
+        
+        budgetNode.add(incomeNode);
+        budgetNode.add(expenseNode);
+        budgetNode.add(balanceNode);
+        
+        _rootNode.add(budgetNode);
+        _treeModel.reload();
+        expandAllNodes();
+    }
+    
+    public void showError(String message) {
+        javax.swing.JOptionPane.showMessageDialog(this, message, "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
 }

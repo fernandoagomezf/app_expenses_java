@@ -25,7 +25,19 @@ public class MainWindow extends JFrame {
     private JSplitPane _leftSplitPane;
     private JSplitPane _rightSplitPane;
     
+    // MVC Controllers
+    private com.blendwerk.pet.application.controllers.TreeController _treeController;
+    private com.blendwerk.pet.application.controllers.TabbedController _tabbedController;
+    private com.blendwerk.pet.application.controllers.DetailsController _detailsController;
+    private com.blendwerk.pet.application.controllers.MainController _mainController;
+    
+    // Default constructor for compatibility
     public MainWindow() {
+        this(null);
+    }
+    
+    // MVC-aware constructor
+    public MainWindow(com.blendwerk.pet.application.models.BudgetModel budgetModel) {
         setTitle("Blendwerk Personal Expense Tracker");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,6 +45,21 @@ public class MainWindow extends JFrame {
         setMinimumSize(new Dimension(920, 680));
 
         initializeComponents();
+        
+        // Initialize MVC controllers if model is provided
+        if (budgetModel != null) {
+            initializeControllers(budgetModel);
+        }
+    }
+    
+    private void initializeControllers(com.blendwerk.pet.application.models.BudgetModel budgetModel) {
+        _treeController = new com.blendwerk.pet.application.controllers.TreeController(budgetModel, _budgetTreePanel);
+        _tabbedController = new com.blendwerk.pet.application.controllers.TabbedController(budgetModel, _budgetTabbedPane);
+        _detailsController = new com.blendwerk.pet.application.controllers.DetailsController(_budgetDetailsPanel);
+        _mainController = new com.blendwerk.pet.application.controllers.MainController(budgetModel, _treeController, _tabbedController, _detailsController);
+        
+        // Set up controller coordination
+        _treeController.setTabbedController(_tabbedController);
     }
     
     private void initializeComponents() {        
@@ -192,8 +219,19 @@ public class MainWindow extends JFrame {
     }
     
     private void createNewBudget() {
-        System.out.println("Creating new budget...");
-        _budgetTabbedPane.addNewBudgetTab("New Budget " + (_budgetTabbedPane.getTabCount() + 1));
+        if (_mainController != null) {
+            // Use MVC architecture
+            _mainController.createNewBudget(this);
+        } else {
+            // Fallback for legacy mode
+            System.out.println("Creating new budget (legacy mode)...");
+            _budgetTabbedPane.addNewBudgetTab("New Budget " + (_budgetTabbedPane.getTabCount() + 1));
+        }
+    }
+    
+    public void createNewBudgetFromTabbedPane() {
+        // Public method for TabbedPane to call
+        createNewBudget();
     }
     
     private void openBudget() {
@@ -296,9 +334,17 @@ public class MainWindow extends JFrame {
     
     // Public methods for inter-component communication
     public void showTransactionDetails(Object[] transactionData) {
-        _budgetDetailsPanel.loadTransactionDetails(transactionData);
-        if (!_budgetDetailsPanel.isVisible()) {
-            toggleDetailsPanel();
+        if (_detailsController != null) {
+            _detailsController.showTransactionDetails(transactionData);
+            if (!_budgetDetailsPanel.isVisible()) {
+                toggleDetailsPanel();
+            }
+        } else {
+            // Fallback for legacy mode
+            _budgetDetailsPanel.loadTransactionDetails(transactionData);
+            if (!_budgetDetailsPanel.isVisible()) {
+                toggleDetailsPanel();
+            }
         }
     }
     
@@ -314,6 +360,11 @@ public class MainWindow extends JFrame {
     }
     
     public void openBudgetTab(String budgetName) {
-        _budgetTabbedPane.addNewBudgetTab(budgetName);
+        if (_tabbedController != null) {
+            _tabbedController.openBudgetTab(budgetName);
+        } else {
+            // Fallback for legacy mode
+            _budgetTabbedPane.addNewBudgetTab(budgetName);
+        }
     }
 }
