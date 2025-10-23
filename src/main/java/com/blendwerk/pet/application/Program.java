@@ -31,8 +31,9 @@ public class Program {
         var summary = new FileStorageSummary();
         var budgetRepository = new FileBudgetRepository(cache, storage, summary);
         var budgetingService = new BudgetingService(budgetRepository);
+        System.out.println(budgetingService.toString());
 
-        MainWindow mainWindow = new MainWindow(budgetingService);
+        MainWindow mainWindow = new MainWindow();
         mainWindow.setVisible(true);
         
         System.out.println("Personal Expense Tracker started.");

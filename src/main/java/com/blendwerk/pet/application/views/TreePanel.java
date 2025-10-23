@@ -95,24 +95,19 @@ public class TreePanel extends JPanel {
     }
     
     private void populateWithSampleData() {
-        var q1_2025 = new DefaultMutableTreeNode("Q1 2025");
-        var q2_2025 = new DefaultMutableTreeNode("Q2 2025");
         
         var january = new DefaultMutableTreeNode("January 2025 Budget");
         populateSubNodesWithSampleData(january);        
         var february = new DefaultMutableTreeNode("February 2025 Budget");
         populateSubNodesWithSampleData(february);
         
-        q1_2025.add(january);
-        q1_2025.add(february);
+        _rootNode.add(january);
+        _rootNode.add(february);
         
         var april = new DefaultMutableTreeNode("April 2025 Budget");
         populateSubNodesWithSampleData(april);
         
-        q2_2025.add(april);
-        
-        _rootNode.add(q1_2025);
-        _rootNode.add(q2_2025);
+        _rootNode.add(april);        
         
         expandAllNodes();
         _treeModel.reload();

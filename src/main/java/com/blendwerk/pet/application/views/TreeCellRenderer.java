@@ -32,9 +32,8 @@ public class TreeCellRenderer extends DefaultTreeCellRenderer {
         var node = (DefaultMutableTreeNode)value;
         var icon = switch (node.getLevel()) {
             case 0 -> loadIcon("icons8-savings-48.png");
-            case 1 -> loadIcon("icons8-pay-date-48.png");
-            case 2 -> loadIcon("icons8-budget-48.png");
-            case 3 -> {
+            case 1 -> loadIcon("icons8-budget-48.png");
+            case 2 -> {
                 if (isIncomeNode(node)) {
                     yield loadIcon("icons8-deposit-48.png");
                 } else if (isExpenseNode(node)) {

@@ -15,8 +15,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
-import com.blendwerk.pet.application.services.BudgetingService;
-
 public class MainWindow extends JFrame {
     private TreePanel _budgetTreePanel;
     private DetailsPanel _budgetDetailsPanel;
@@ -26,14 +24,8 @@ public class MainWindow extends JFrame {
     private JToolBar _toolBar;
     private JSplitPane _leftSplitPane;
     private JSplitPane _rightSplitPane;
-    private BudgetingService _service;
     
-    public MainWindow(BudgetingService service) {        
-        if (service == null) {
-            throw new IllegalArgumentException("BudgetingService cannot be null");
-        }
-        _service = service;
-
+    public MainWindow() {
         setTitle("Blendwerk Personal Expense Tracker");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
