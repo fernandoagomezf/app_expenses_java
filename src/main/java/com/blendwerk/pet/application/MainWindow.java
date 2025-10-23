@@ -24,8 +24,14 @@ public class MainWindow extends JFrame {
     private JToolBar _toolBar;
     private JSplitPane _leftSplitPane;
     private JSplitPane _rightSplitPane;
+    private BudgetingService _service;
     
-    public MainWindow() {
+    public MainWindow(BudgetingService service) {        
+        if (service == null) {
+            throw new IllegalArgumentException("BudgetingService cannot be null");
+        }
+        _service = service;
+
         setTitle("Blendwerk Personal Expense Tracker");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -214,14 +220,14 @@ public class MainWindow extends JFrame {
     
     private void addTransaction() {
         System.out.println("Adding transaction...");
-        TransactionDialog dialog = new TransactionDialog(this, "Add Transaction", null);
+        TransactionDialog dialog = new TransactionDialog(this, "Add transaction", null);
         dialog.setVisible(true);
     }
     
     private void editTransaction() {
         System.out.println("Editing transaction...");
         
-        TransactionDialog dialog = new TransactionDialog(this, "Edit Transaction", null);
+        TransactionDialog dialog = new TransactionDialog(null, "Edit transaction", null);
         dialog.setVisible(true);
     }
     

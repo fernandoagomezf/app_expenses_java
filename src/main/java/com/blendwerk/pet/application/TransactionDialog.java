@@ -9,10 +9,6 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Dialog for adding or editing transactions.
- * Provides form fields for all transaction properties including type, category, amount, date, and description.
- */
 public class TransactionDialog extends JDialog {
     private JComboBox<String> typeComboBox;
     private JComboBox<String> categoryComboBox;
@@ -43,7 +39,7 @@ public class TransactionDialog extends JDialog {
         pack();
         setLocationRelativeTo(owner);
     }
-    
+        
     private void initializeComponents() {
         // Transaction type
         typeComboBox = new JComboBox<>(new String[]{"Income", "Expense"});
@@ -285,7 +281,7 @@ public class TransactionDialog extends JDialog {
     }
     
     public String getTransactionType() {
-        return (String) typeComboBox.getSelectedItem();
+        return (String)typeComboBox.getSelectedItem();
     }
     
     public String getTransactionCategory() {
