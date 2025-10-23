@@ -1,4 +1,4 @@
-package com.blendwerk.pet.application;
+package com.blendwerk.pet.application.views;
 
 import java.awt.Dimension;
 import java.awt.BorderLayout;
@@ -14,6 +14,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+
+import com.blendwerk.pet.application.services.BudgetingService;
 
 public class MainWindow extends JFrame {
     private TreePanel _budgetTreePanel;

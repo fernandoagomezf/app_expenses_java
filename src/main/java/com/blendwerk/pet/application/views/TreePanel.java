@@ -1,4 +1,4 @@
-package com.blendwerk.pet.application;
+package com.blendwerk.pet.application.views;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

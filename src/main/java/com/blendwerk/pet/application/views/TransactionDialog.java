@@ -1,4 +1,4 @@
-package com.blendwerk.pet.application;
+package com.blendwerk.pet.application.views;
 
 import com.blendwerk.pet.domain.budgeting.Currency;
 import com.blendwerk.pet.domain.budgeting.ExpenseCategory;

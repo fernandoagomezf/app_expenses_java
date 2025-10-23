@@ -1,4 +1,4 @@
-package com.blendwerk.pet.application;
+package com.blendwerk.pet.application.services;
 
 import java.util.Optional;
 

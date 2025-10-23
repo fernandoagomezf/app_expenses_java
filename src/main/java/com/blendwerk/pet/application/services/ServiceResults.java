@@ -1,4 +1,4 @@
-package com.blendwerk.pet.application;
+package com.blendwerk.pet.application.services;
 
 public record ServiceResults<T>(boolean success, String message, Iterable<T> results) {
     public static <T> ServiceResults<T> success(Iterable<T> results) {

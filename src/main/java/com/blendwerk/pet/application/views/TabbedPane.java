@@ -1,4 +1,4 @@
-package com.blendwerk.pet.application;
+package com.blendwerk.pet.application.views;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;

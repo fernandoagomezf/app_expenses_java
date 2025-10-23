@@ -3,6 +3,8 @@ package com.blendwerk.pet.application;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import com.blendwerk.pet.application.services.BudgetingService;
+import com.blendwerk.pet.application.views.MainWindow;
 import com.blendwerk.pet.infrastructure.repositories.FileBudgetRepository;
 import com.blendwerk.pet.infrastructure.services.FileStorage;
 import com.blendwerk.pet.infrastructure.services.FileStorageSummary;
