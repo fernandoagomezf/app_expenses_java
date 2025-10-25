@@ -38,7 +38,6 @@ public class TreePanel extends JPanel {
         setBorder(BorderFactory.createTitledBorder("Budgets"));
 
         initializeComponents();
-        populateWithSampleData();
     }
     
     private void initializeComponents() {
@@ -94,34 +93,6 @@ public class TreePanel extends JPanel {
         }
     }
     
-    private void populateWithSampleData() {
-        
-        var january = new DefaultMutableTreeNode("January 2025 Budget");
-        populateSubNodesWithSampleData(january);        
-        var february = new DefaultMutableTreeNode("February 2025 Budget");
-        populateSubNodesWithSampleData(february);
-        
-        _rootNode.add(january);
-        _rootNode.add(february);
-        
-        var april = new DefaultMutableTreeNode("April 2025 Budget");
-        populateSubNodesWithSampleData(april);
-        
-        _rootNode.add(april);        
-        
-        expandAllNodes();
-        _treeModel.reload();
-    }
-    
-    private void populateSubNodesWithSampleData(DefaultMutableTreeNode budgetNode) {
-        var income = new DefaultMutableTreeNode("$ 5,000.00");
-        var expenses = new DefaultMutableTreeNode("$ 3,500.00");
-        var balance = new DefaultMutableTreeNode("$ 1,500.00");
-        
-        budgetNode.add(income);
-        budgetNode.add(expenses);
-        budgetNode.add(balance);
-    }
     
     private void expandAllNodes() {
         for (int i = 0; i < _tree.getRowCount(); i++) {
@@ -205,7 +176,7 @@ public class TreePanel extends JPanel {
         
         if (budgetName != null && !budgetName.trim().isEmpty()) {
             DefaultMutableTreeNode newBudget = new DefaultMutableTreeNode(budgetName.trim());
-            populateSubNodesWithSampleData(newBudget);
+            
             groupNode.add(newBudget);
             _treeModel.reload();
             System.out.println("Added budget: " + budgetName + " to group: " + groupNode.toString());
