@@ -6,18 +6,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import com.blendwerk.pet.application.models.BudgetSummary;
 
 public class TreePanel extends JPanel {
     private MainWindow _mainWindow;
@@ -57,183 +53,38 @@ public class TreePanel extends JPanel {
         _refreshButton.setToolTipText("Refresh budget tree");
         _refreshButton.addActionListener(e -> refreshTree());        
         _treeToolBar.add(_refreshButton);
-
-        _tree.addTreeSelectionListener(e -> { onTreeSelectionChanged(e); });
-        _tree.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) { onMouseClicked(e); }            
-            public void mousePressed(MouseEvent e) { onMousePressedOrReleased(e); }            
-            public void mouseReleased(MouseEvent e) { onMousePressedOrReleased(e); }
-        });
         
         add(_scrollPane, BorderLayout.CENTER);
         add(_treeToolBar, BorderLayout.NORTH);
     }
 
-    private void onMouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
-            var path = _tree.getPathForLocation(e.getX(), e.getY());
-            if (path != null) {
-                var node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                handleDoubleClick(node);
-            }
-        }
-    }
-
-    private void onMousePressedOrReleased(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-            showContextMenu(e);
-        }
-    }
-
-    private void onTreeSelectionChanged(TreeSelectionEvent e) {
-        var path = e.getNewLeadSelectionPath();
-        if (path != null) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            handleSelection(node);
-        }
-    }
-    
-    
     private void expandAllNodes() {
         for (int i = 0; i < _tree.getRowCount(); i++) {
             _tree.expandRow(i);
         }
     }
-    
-    private void handleDoubleClick(DefaultMutableTreeNode node) {
-        var nodeText = node.toString();        
-        if (isBudgetNode(node)) {
-            System.out.println("Opening budget tab for: " + nodeText);
-            _mainWindow.openBudgetTab(nodeText);
-        }
-    }
-    
-    private void handleSelection(DefaultMutableTreeNode node) {
-        String nodeText = node.toString();
         
-        // If it's a budget node, we could show some summary info, but for now just log
-        if (isBudgetNode(node)) {
-            System.out.println("Selected budget: " + nodeText);
-            // Note: We don't automatically show details for budget selection anymore
-            // Details panel now shows transaction details when a transaction is selected
-        }
-    }
-    
-    private boolean isBudgetNode(DefaultMutableTreeNode node) {
-        return node.getLevel() == 2;
-    }
-    
-    private void showContextMenu(MouseEvent e) {
-        TreePath path = _tree.getPathForLocation(e.getX(), e.getY());
-        if (path != null) {
-            _tree.setSelectionPath(path);
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            
-            JPopupMenu contextMenu = createContextMenu(node);
-            contextMenu.show(_tree, e.getX(), e.getY());
-        }
-    }
-    
-    private JPopupMenu createContextMenu(DefaultMutableTreeNode node) {
-        var menu = new JPopupMenu();
-        
-        if (isBudgetNode(node)) {
-            var openTab = new JMenuItem("Open in Tab");
-            openTab.addActionListener(e -> _mainWindow.openBudgetTab(node.toString()));
-            
-            var showDetails = new JMenuItem("Show Details");
-            showDetails.addActionListener(e -> {
-                System.out.println("Showing details for budget: " + node.toString());
-                _mainWindow.openBudgetTab(node.toString());
-            });
-            
-            var addTransaction = new JMenuItem("Add Transaction");
-            addTransaction.addActionListener(e -> {
-                System.out.println("Adding transaction to: " + node.toString());
-            });
-            
-            menu.add(openTab);
-            menu.add(showDetails);
-            menu.addSeparator();
-            menu.add(addTransaction);
-        } else if (node == _rootNode || node.getParent() == _rootNode) {
-            var addBudget = new JMenuItem("Add Budget");
-            addBudget.addActionListener(e -> addBudgetToGroup(node));
-            
-            menu.add(addBudget);
-        }
-        
-        return menu;
-    }
-        
-    private void addBudgetToGroup(DefaultMutableTreeNode groupNode) {
-        String budgetName = JOptionPane.showInputDialog(
-            this,
-            "Enter budget name:",
-            "Add Budget to " + groupNode.toString(),
-            JOptionPane.PLAIN_MESSAGE
-        );
-        
-        if (budgetName != null && !budgetName.trim().isEmpty()) {
-            DefaultMutableTreeNode newBudget = new DefaultMutableTreeNode(budgetName.trim());
-            
-            groupNode.add(newBudget);
-            _treeModel.reload();
-            System.out.println("Added budget: " + budgetName + " to group: " + groupNode.toString());
-        }
-    }
-    
     private void refreshTree() {
         System.out.println("Refreshing budget tree...");
         _treeModel.reload();
         expandAllNodes();
     }
     
-    // MVC Methods for Controller integration
-    public void updateBudgetTree(Iterable<com.blendwerk.pet.domain.budgeting.BudgetView> budgetViews) {
-        // Clear existing data
-        _rootNode.removeAllChildren();
-        
-        // Add budgets from service
-        for (var budgetView : budgetViews) {
-            var budgetNode = new DefaultMutableTreeNode(budgetView.name());
+    public void updateBudgetTree(Iterable<BudgetSummary> budgetSummaries) {        
+        _rootNode.removeAllChildren();        
+        for (var budgetSummary : budgetSummaries) {
+            var budgetNode = new DefaultMutableTreeNode(budgetSummary.name());
             
-            // Add income, expenses, and balance nodes
-            var balance = budgetView.balance();
-            var incomeNode = new DefaultMutableTreeNode("Income: " + balance.toString());
-            var expenseNode = new DefaultMutableTreeNode("Expenses: $0.00"); // TODO: Get from service
-            var balanceNode = new DefaultMutableTreeNode("Balance: " + balance.toString());
-            
+            var incomeNode = new DefaultMutableTreeNode("Income: " + budgetSummary.income());
+            var expenseNode = new DefaultMutableTreeNode("Expenses: " + budgetSummary.expense());
+            var balanceNode = new DefaultMutableTreeNode("Balance: " + budgetSummary.balance());            
             budgetNode.add(incomeNode);
             budgetNode.add(expenseNode);
-            budgetNode.add(balanceNode);
-            
+            budgetNode.add(balanceNode);            
             _rootNode.add(budgetNode);
         }
         
-        // Refresh the tree display
         _treeModel.reload();
         expandAllNodes();
-    }
-    
-    public void addBudgetNode(String budgetName, String balance) {
-        var budgetNode = new DefaultMutableTreeNode(budgetName);
-        
-        // Add sub-nodes
-        var incomeNode = new DefaultMutableTreeNode("Income: $0.00");
-        var expenseNode = new DefaultMutableTreeNode("Expenses: $0.00");
-        var balanceNode = new DefaultMutableTreeNode("Balance: " + balance);
-        
-        budgetNode.add(incomeNode);
-        budgetNode.add(expenseNode);
-        budgetNode.add(balanceNode);
-        
-        _rootNode.add(budgetNode);
-        _treeModel.reload();
-        expandAllNodes();
-    }
-    
-    public void showError(String message) {
-        javax.swing.JOptionPane.showMessageDialog(this, message, "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-    }
+    }    
 }

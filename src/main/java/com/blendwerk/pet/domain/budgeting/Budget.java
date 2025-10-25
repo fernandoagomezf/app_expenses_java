@@ -152,13 +152,24 @@ public final class Budget implements Entity {
         return result;
     }
 
-    public BudgetView asView() {
-        var balance = balance();
-        return new BudgetView(
-            _id,
-            _name,
-            balance
-        );
+    public Money incomes() {
+        var zero = Money.zero(_currency);
+        var result = stream()
+        .filter(x -> x.sign() >= 0)
+        .map(Transaction::amount)
+        .reduce(zero, Money::add);        
+
+        return result;
+    }
+
+    public Money expenses() {
+        var zero = Money.zero(_currency);
+        var result = stream()
+        .filter(x -> x.sign() < 0)
+        .map(Transaction::amount)
+        .reduce(zero, Money::add);        
+
+        return result;
     }
     
     public static BudgetRebuilder rebuilder() {

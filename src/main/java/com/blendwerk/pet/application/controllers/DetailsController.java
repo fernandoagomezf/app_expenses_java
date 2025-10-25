@@ -1,12 +1,23 @@
 package com.blendwerk.pet.application.controllers;
 
+import com.blendwerk.pet.application.models.BudgetModel;
+import com.blendwerk.pet.application.models.BudgetModelListener;
 import com.blendwerk.pet.application.views.DetailsPanel;
+import com.blendwerk.pet.domain.budgeting.Budget;
 
-public class DetailsController {
+public class DetailsController implements BudgetModelListener {
+    private final BudgetModel _model;
     private final DetailsPanel _view;
     
-    public DetailsController(DetailsPanel view) {
-        if (view == null) throw new IllegalArgumentException("View cannot be null");
+    public DetailsController(BudgetModel model, DetailsPanel view) {
+        if (model == null) {
+            throw new IllegalArgumentException("Model cannot be null");
+        }
+        if (view == null) {
+            throw new IllegalArgumentException("View cannot be null");
+        }
+        _model = model;
+        _model.addListener(this);
         _view = view;
     }
     
@@ -27,4 +38,8 @@ public class DetailsController {
     public void clearDetails() {
         _view.clearTransactionDetails();
     }
+
+    public void onBudgetCreated(Budget budget) { }
+
+    public void onError(String message) { }
 }

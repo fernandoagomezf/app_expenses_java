@@ -1,6 +1,10 @@
 package com.blendwerk.pet.application.controllers;
 
 import com.blendwerk.pet.application.models.BudgetModel;
+import com.blendwerk.pet.application.models.BudgetModelListener;
+import com.blendwerk.pet.application.models.CreateBudgetInput;
+import com.blendwerk.pet.application.views.MainWindow;
+import com.blendwerk.pet.domain.budgeting.Budget;
 import com.blendwerk.pet.domain.budgeting.Currency;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -12,27 +16,37 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
-public class MainController {
+public class MainController implements BudgetModelListener {
     private final BudgetModel _model;
-    //private final TreeController _treeController;
-    private final TabbedController _tabbedController;
-    //private final DetailsController _detailsController;
+    private final MainWindow _view;
     
-    public MainController(BudgetModel model, TreeController treeController, 
-                         TabbedController tabbedController, DetailsController detailsController) {
-        if (model == null) throw new IllegalArgumentException("Model cannot be null");
-        if (treeController == null) throw new IllegalArgumentException("TreeController cannot be null");
-        if (tabbedController == null) throw new IllegalArgumentException("TabbedController cannot be null");
-        if (detailsController == null) throw new IllegalArgumentException("DetailsController cannot be null");
-        
+    public MainController(BudgetModel model, MainWindow view) {
+        if (model == null) {
+            throw new IllegalArgumentException("Model cannot be null");
+        }
+        if (view == null) { 
+            throw new IllegalArgumentException("View cannot be null");
+        }        
         _model = model;
-        //_treeController = treeController;
-        _tabbedController = tabbedController;
-        //_detailsController = detailsController;
+        _model.addListener(this);
+        _view = view;
+    }
+
+    public void onBudgetCreated(Budget budget) {
+        JOptionPane.showMessageDialog(_view,
+            "Budget '" + budget.name() + "' created successfully.",
+            "Success", 
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void onError(String message) {                
+        JOptionPane.showMessageDialog(_view,
+            "Failed to create budget: " + message,
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
     }
     
     public void createNewBudget(JFrame parentWindow) {
-        // Show budget creation dialog
         CreateBudgetDialog dialog = new CreateBudgetDialog(parentWindow);
         dialog.show();
         
@@ -40,23 +54,8 @@ public class MainController {
             String budgetName = dialog.getBudgetName();
             String currency = dialog.getCurrency();
             
-            // Create budget via model
-            var result = _model.createBudget(budgetName, currency);
-            
-            if (result.success() && result.result().isPresent()) {
-                var budget = result.result().get();
-                
-                // Budget is automatically added to tree via listener in TreeController
-                // Now open a tab for the new budget
-                _tabbedController.openBudgetTabForNewBudget(budgetName, budget);
-                
-                System.out.println("✅ Created budget: " + budgetName + " with currency: " + currency);
-            } else {
-                JOptionPane.showMessageDialog(parentWindow, 
-                    "Failed to create budget: " + result.message(), 
-                    "Error", 
-                    JOptionPane.ERROR_MESSAGE);
-            }
+            var input = new CreateBudgetInput(budgetName, currency);
+            _model.createBudget(input);            
         }
     }
     

@@ -1,5 +1,15 @@
 package com.blendwerk.pet.application.views;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -11,17 +21,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
  
 public class TabbedPane extends JTabbedPane {
     private MainWindow _mainWindow;
@@ -43,17 +42,11 @@ public class TabbedPane extends JTabbedPane {
     }
     
     private void setupEventHandlers() {
-        // Tab selection listener
         addChangeListener(e -> {
             int selectedIndex = getSelectedIndex();
             if (selectedIndex >= 0) {
                 String tabTitle = getTitleAt(selectedIndex);
-                System.out.println("Selected tab: " + tabTitle);
-                
-                // Clear transaction details when switching tabs since no transaction is selected
-                if (!tabTitle.equals("Welcome")) {
-                    _mainWindow.clearTransactionDetails();
-                }
+                System.out.println("Selected tab: " + tabTitle);                
             }
         });
     }
@@ -68,7 +61,6 @@ public class TabbedPane extends JTabbedPane {
         var panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        // Welcome message
         var messagePanel = new JPanel(new GridBagLayout());
         var gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -86,13 +78,11 @@ public class TabbedPane extends JTabbedPane {
         gbc.gridy = 1;
         messagePanel.add(instructionLabel, gbc);
         
-        // Quick action buttons
         var buttonPanel = new JPanel(new FlowLayout());
         
         var newBudgetButton = new JButton("Create New Budget");
         newBudgetButton.addActionListener(e -> {
-            // Delegate to MainWindow to create new budget with proper MVC flow
-            _mainWindow.createNewBudgetFromTabbedPane();
+            _mainWindow.createNewBudget();
         });
         
         var openBudgetButton = new JButton("Open Budget");
@@ -244,7 +234,6 @@ public class TabbedPane extends JTabbedPane {
                             rowData[i] = tableModel.getValueAt(selectedRow, i);
                         }
                         System.out.println("Double-clicked transaction: " + rowData[4]);
-                        _mainWindow.showTransactionDetails(rowData);
                     }
                 }
             }
@@ -260,7 +249,6 @@ public class TabbedPane extends JTabbedPane {
                         rowData[i] = tableModel.getValueAt(selectedRow, i);
                     }
                     System.out.println("Selected transaction in tab: " + rowData[4]);
-                    _mainWindow.showTransactionDetails(rowData);
                 }
             }
         });
@@ -451,8 +439,7 @@ public class TabbedPane extends JTabbedPane {
     }
     
     public void showCreateBudgetDialog() {
-        // Delegate to MainWindow for proper MVC flow
-        _mainWindow.createNewBudgetFromTabbedPane();
+        _mainWindow.createNewBudget();
     }
     
     private JPanel createBudgetPanelWithData(String budgetName, com.blendwerk.pet.domain.budgeting.Budget budget) {
@@ -528,8 +515,8 @@ public class TabbedPane extends JTabbedPane {
             }
             row[2] = transaction.amount().toString();
             row[3] = budget.currency().toString();
-            row[4] = "N/A"; // TODO: Add date when implemented
-            row[5] = "N/A"; // TODO: Add description when implemented
+            row[4] = "N/A"; 
+            row[5] = "N/A"; 
             
             model.addRow(row);
         });
@@ -546,7 +533,7 @@ public class TabbedPane extends JTabbedPane {
                     for (int i = 0; i < table.getColumnCount(); i++) {
                         rowData[i] = table.getValueAt(selectedRow, i);
                     }
-                    _mainWindow.showTransactionDetails(rowData);
+                    //_mainWindow.showTransactionDetails(rowData);
                 }
             }
         });

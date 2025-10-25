@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -14,6 +13,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+
+import com.blendwerk.pet.application.controllers.DetailsController;
+import com.blendwerk.pet.application.controllers.MainController;
+import com.blendwerk.pet.application.controllers.TabbedController;
+import com.blendwerk.pet.application.controllers.TreeController;
+import com.blendwerk.pet.application.models.BudgetModel;
 
 public class MainWindow extends JFrame {
     private TreePanel _budgetTreePanel;
@@ -25,41 +30,28 @@ public class MainWindow extends JFrame {
     private JSplitPane _leftSplitPane;
     private JSplitPane _rightSplitPane;
     
-    // MVC Controllers
-    private com.blendwerk.pet.application.controllers.TreeController _treeController;
-    private com.blendwerk.pet.application.controllers.TabbedController _tabbedController;
-    private com.blendwerk.pet.application.controllers.DetailsController _detailsController;
-    private com.blendwerk.pet.application.controllers.MainController _mainController;
+    private TreeController _treeController;
+    private TabbedController _tabbedController;
+    private DetailsController _detailsController;
+    private MainController _mainController;
     
-    // Default constructor for compatibility
-    public MainWindow() {
-        this(null);
-    }
     
-    // MVC-aware constructor
-    public MainWindow(com.blendwerk.pet.application.models.BudgetModel budgetModel) {
+    public MainWindow(BudgetModel budgetModel) {
+        if (budgetModel == null) {
+            throw new IllegalArgumentException("Budget model cannot be null");
+        }
+        
         setTitle("Blendwerk Personal Expense Tracker");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setMinimumSize(new Dimension(920, 680));
-
+        setMinimumSize(new Dimension(920, 680));        
         initializeComponents();
-        
-        // Initialize MVC controllers if model is provided
-        if (budgetModel != null) {
-            initializeControllers(budgetModel);
-        }
-    }
-    
-    private void initializeControllers(com.blendwerk.pet.application.models.BudgetModel budgetModel) {
-        _treeController = new com.blendwerk.pet.application.controllers.TreeController(budgetModel, _budgetTreePanel);
-        _tabbedController = new com.blendwerk.pet.application.controllers.TabbedController(budgetModel, _budgetTabbedPane);
-        _detailsController = new com.blendwerk.pet.application.controllers.DetailsController(_budgetDetailsPanel);
-        _mainController = new com.blendwerk.pet.application.controllers.MainController(budgetModel, _treeController, _tabbedController, _detailsController);
-        
-        // Set up controller coordination
-        _treeController.setTabbedController(_tabbedController);
+
+        _treeController = new TreeController(budgetModel, _budgetTreePanel);
+        _tabbedController = new TabbedController(budgetModel, _budgetTabbedPane);
+        _detailsController = new DetailsController(budgetModel, _budgetDetailsPanel);
+        _mainController = new MainController(budgetModel, this);        
     }
     
     private void initializeComponents() {        
@@ -94,89 +86,44 @@ public class MainWindow extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-        
-        JMenuItem newBudgetItem = new JMenuItem("New Budget");
-        newBudgetItem.setMnemonic(KeyEvent.VK_N);
-        newBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        newBudgetItem.addActionListener(e -> createNewBudget());
-        
-        JMenuItem openBudgetItem = new JMenuItem("Open Budget");
-        openBudgetItem.setMnemonic(KeyEvent.VK_O);
-        openBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-        openBudgetItem.addActionListener(e -> openBudget());
-        
-        JMenuItem closeBudgetItem = new JMenuItem("Close Budget");
-        closeBudgetItem.setMnemonic(KeyEvent.VK_C);
-        closeBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
-        closeBudgetItem.addActionListener(e -> closeCurrentBudget());
-        
+        fileMenu.setMnemonic(KeyEvent.VK_F);        
+            JMenuItem newBudgetItem = new JMenuItem("New Budget");
+            newBudgetItem.setMnemonic(KeyEvent.VK_N);
+            newBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+            newBudgetItem.addActionListener(e -> createNewBudget());        
+            JMenuItem closeBudgetItem = new JMenuItem("Close Budget");
+            closeBudgetItem.setMnemonic(KeyEvent.VK_C);
+            closeBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+            closeBudgetItem.addActionListener(e -> closeCurrentBudget());        
+            JMenuItem exitItem = new JMenuItem("Exit");
+            exitItem.setMnemonic(KeyEvent.VK_X);
+            exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(newBudgetItem);
-        fileMenu.add(openBudgetItem);
         fileMenu.addSeparator();
         fileMenu.add(closeBudgetItem);
-        fileMenu.addSeparator();
-        
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.setMnemonic(KeyEvent.VK_X);
-        exitItem.addActionListener(e -> System.exit(0));
+        fileMenu.addSeparator();        
         fileMenu.add(exitItem);
         
         JMenu editMenu = new JMenu("Edit");
-        editMenu.setMnemonic(KeyEvent.VK_E);
-        
-        JMenuItem addTransactionItem = new JMenuItem("Add Transaction");
-        addTransactionItem.setMnemonic(KeyEvent.VK_A);
-        addTransactionItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.CTRL_MASK));
-        addTransactionItem.addActionListener(e -> addTransaction());
-        
-        JMenuItem editTransactionItem = new JMenuItem("Edit Transaction");
-        editTransactionItem.setMnemonic(KeyEvent.VK_E);
-        editTransactionItem.addActionListener(e -> editTransaction());
-        
-        JMenuItem deleteTransactionItem = new JMenuItem("Delete Transaction");
-        deleteTransactionItem.setMnemonic(KeyEvent.VK_D);
-        deleteTransactionItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-        deleteTransactionItem.addActionListener(e -> deleteTransaction());
-        
-        editMenu.add(addTransactionItem);
-        editMenu.add(editTransactionItem);
-        editMenu.add(deleteTransactionItem);
-        editMenu.addSeparator();
-        
-        JMenuItem settingsItem = new JMenuItem("Settings");
-        settingsItem.setMnemonic(KeyEvent.VK_S);
-        settingsItem.addActionListener(e -> showSettings());
-        editMenu.add(settingsItem);
+        editMenu.setMnemonic(KeyEvent.VK_E);        
         
         JMenu viewMenu = new JMenu("View");
-        viewMenu.setMnemonic(KeyEvent.VK_V);
-        
-        JMenuItem detailsItem = new JMenuItem("Toggle Details Panel");
-        detailsItem.setMnemonic(KeyEvent.VK_D);
-        detailsItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
-        detailsItem.addActionListener(e -> toggleDetailsPanel());
-        
+        viewMenu.setMnemonic(KeyEvent.VK_V);        
+            JMenuItem detailsItem = new JMenuItem("Toggle Details Panel");
+            detailsItem.setMnemonic(KeyEvent.VK_D);
+            detailsItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
+            detailsItem.addActionListener(e -> toggleDetailsPanel());        
         viewMenu.add(detailsItem);
         
-        JMenu windowMenu = new JMenu("Window");
-        windowMenu.setMnemonic(KeyEvent.VK_W);
-        
-        JMenuItem organizeBudgetsItem = new JMenuItem("Organize Budget Tabs");
-        organizeBudgetsItem.addActionListener(e -> organizeBudgetTabs());
-        windowMenu.add(organizeBudgetsItem);
-        
         JMenu helpMenu = new JMenu("Help");
-        helpMenu.setMnemonic(KeyEvent.VK_H);
-        
-        JMenuItem aboutItem = new JMenuItem("About");
-        aboutItem.addActionListener(e -> showAbout());
+        helpMenu.setMnemonic(KeyEvent.VK_H);        
+            JMenuItem aboutItem = new JMenuItem("About");
+            aboutItem.addActionListener(e -> showAbout());
         helpMenu.add(aboutItem);
         
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         menuBar.add(viewMenu);
-        menuBar.add(windowMenu);
         menuBar.add(helpMenu);
         
         return menuBar;
@@ -190,99 +137,26 @@ public class MainWindow extends JFrame {
         newButton.setToolTipText("Create new budget");
         newButton.addActionListener(e -> createNewBudget());
         
-        JButton openButton = new JButton("Open");
-        openButton.setToolTipText("Open budget");
-        openButton.addActionListener(e -> openBudget());
-        
-        JButton addTransactionButton = new JButton("Add Transaction");
-        addTransactionButton.setToolTipText("Add new transaction");
-        addTransactionButton.addActionListener(e -> addTransaction());
-        
-        JButton settingsButton = new JButton("Settings");
-        settingsButton.setToolTipText("Application settings");
-        settingsButton.addActionListener(e -> showSettings());
-        
         JButton toggleDetailsButton = new JButton("Details");
         toggleDetailsButton.setToolTipText("Toggle details panel");
         toggleDetailsButton.addActionListener(e -> toggleDetailsPanel());
         
         toolBar.add(newButton);
-        toolBar.add(openButton);
-        toolBar.addSeparator();
-        toolBar.add(addTransactionButton);
         toolBar.addSeparator();
         toolBar.add(toggleDetailsButton);
-        toolBar.addSeparator();
-        toolBar.add(settingsButton);
         
         return toolBar;
     }
     
-    private void createNewBudget() {
-        if (_mainController != null) {
-            // Use MVC architecture
-            _mainController.createNewBudget(this);
-        } else {
-            // Fallback for legacy mode
-            System.out.println("Creating new budget (legacy mode)...");
-            _budgetTabbedPane.addNewBudgetTab("New Budget " + (_budgetTabbedPane.getTabCount() + 1));
-        }
-    }
-    
-    public void createNewBudgetFromTabbedPane() {
-        // Public method for TabbedPane to call
-        createNewBudget();
-    }
-    
-    private void openBudget() {
-        System.out.println("Opening budget...");
-        
-        JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            String fileName = fileChooser.getSelectedFile().getName();
-            _budgetTabbedPane.addNewBudgetTab("Opened: " + fileName);
-        }
+    public void createNewBudget() {
+        _mainController.createNewBudget(this);        
     }
     
     private void closeCurrentBudget() {
         System.out.println("Closing current budget...");
         _budgetTabbedPane.closeCurrentTab();
     }
-    
-    private void addTransaction() {
-        System.out.println("Adding transaction...");
-        TransactionDialog dialog = new TransactionDialog(this, "Add transaction", null);
-        dialog.setVisible(true);
-    }
-    
-    private void editTransaction() {
-        System.out.println("Editing transaction...");
         
-        TransactionDialog dialog = new TransactionDialog(null, "Edit transaction", null);
-        dialog.setVisible(true);
-    }
-    
-    private void deleteTransaction() {
-        System.out.println("Deleting transaction...");
-        int result = JOptionPane.showConfirmDialog(
-            this,
-            "Are you sure you want to delete the selected transaction?",
-            "Confirm Delete",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE
-        );
-        if (result == JOptionPane.YES_OPTION) {
-            System.out.println("Transaction deleted.");
-        }
-    }
-    
-    private void showSettings() {
-        System.out.println("Showing settings...");
-        SettingsDialog dialog = new SettingsDialog(this);
-        dialog.setVisible(true);
-    }
-    
     private void toggleDetailsPanel() {
         boolean visible = _budgetDetailsPanel.isVisible();
         _budgetDetailsPanel.setVisible(!visible);
@@ -291,35 +165,6 @@ public class MainWindow extends JFrame {
         }
     }
     
-    private void organizeBudgetTabs() {
-        System.out.println("Organizing budget tabs...");
-        
-        String[] tabs = new String[_budgetTabbedPane.getTabCount()];
-        for (int i = 0; i < tabs.length; i++) {
-            tabs[i] = _budgetTabbedPane.getTitleAt(i);
-        }
-        
-        if (tabs.length > 0) {
-            String selected = (String) JOptionPane.showInputDialog(
-                this,
-                "Select a budget tab to activate:",
-                "Organize Budget Tabs",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                tabs,
-                tabs[0]
-            );
-            
-            if (selected != null) {
-                for (int i = 0; i < tabs.length; i++) {
-                    if (tabs[i].equals(selected)) {
-                        _budgetTabbedPane.setSelectedIndex(i);
-                        break;
-                    }
-                }
-            }
-        }
-    }
     
     private void showAbout() {
         JOptionPane.showMessageDialog(
@@ -330,41 +175,5 @@ public class MainWindow extends JFrame {
             "About",
             JOptionPane.INFORMATION_MESSAGE
         );
-    }
-    
-    // Public methods for inter-component communication
-    public void showTransactionDetails(Object[] transactionData) {
-        if (_detailsController != null) {
-            _detailsController.showTransactionDetails(transactionData);
-            if (!_budgetDetailsPanel.isVisible()) {
-                toggleDetailsPanel();
-            }
-        } else {
-            // Fallback for legacy mode
-            _budgetDetailsPanel.loadTransactionDetails(transactionData);
-            if (!_budgetDetailsPanel.isVisible()) {
-                toggleDetailsPanel();
-            }
-        }
-    }
-    
-    public void showTransactionDetails(String type, String category, String amount, String date, String description) {
-        _budgetDetailsPanel.loadTransactionDetails(type, category, amount, date, description);
-        if (!_budgetDetailsPanel.isVisible()) {
-            toggleDetailsPanel();
-        }
-    }
-    
-    public void clearTransactionDetails() {
-        _budgetDetailsPanel.clearTransactionDetails();
-    }
-    
-    public void openBudgetTab(String budgetName) {
-        if (_tabbedController != null) {
-            _tabbedController.openBudgetTab(budgetName);
-        } else {
-            // Fallback for legacy mode
-            _budgetTabbedPane.addNewBudgetTab(budgetName);
-        }
     }
 }

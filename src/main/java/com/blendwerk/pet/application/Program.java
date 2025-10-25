@@ -2,12 +2,11 @@ package com.blendwerk.pet.application;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
-import com.blendwerk.pet.application.services.BudgetingService;
+import com.blendwerk.pet.application.models.BudgetModel;
 import com.blendwerk.pet.application.views.MainWindow;
 import com.blendwerk.pet.infrastructure.repositories.FileBudgetRepository;
 import com.blendwerk.pet.infrastructure.services.FileStorage;
-import com.blendwerk.pet.infrastructure.services.FileStorageSummary;
+import com.blendwerk.pet.infrastructure.services.FileStorageScanner;
 import com.blendwerk.pet.infrastructure.services.MemoryCache;
 
 public class Program {
@@ -26,19 +25,13 @@ public class Program {
     }
 
     public Program() {       
-        // Infrastructure Layer
         var cache = new MemoryCache();
         var storage = new FileStorage();
-        var summary = new FileStorageSummary();
-        var budgetRepository = new FileBudgetRepository(cache, storage, summary);
+        var summary = new FileStorageScanner();
+        var repository = new FileBudgetRepository(cache, storage, summary);
         
-        // Application Services Layer
-        var budgetingService = new BudgetingService(budgetRepository);
+        var budgetModel = new BudgetModel(repository);
         
-        // Model Layer (MVC)
-        var budgetModel = new com.blendwerk.pet.application.models.BudgetModel(budgetingService);
-        
-        // View Layer with MVC Controllers
         MainWindow mainWindow = new MainWindow(budgetModel);
         mainWindow.setVisible(true);
         

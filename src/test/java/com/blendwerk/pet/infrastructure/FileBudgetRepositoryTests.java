@@ -21,13 +21,13 @@ import com.blendwerk.pet.infrastructure.services.Cache;
 import com.blendwerk.pet.infrastructure.services.MemoryCache;
 import com.blendwerk.pet.infrastructure.services.Storage;
 import com.blendwerk.pet.infrastructure.services.StorageException;
-import com.blendwerk.pet.infrastructure.services.StorageSummary;
+import com.blendwerk.pet.infrastructure.services.StorageScanner;
 
 @DisplayName("PET::Infrastructure::FileBudgetRepository class")
 public class FileBudgetRepositoryTests {
     private Cache _mockCache;
     private Storage _mockStorage;
-    private StorageSummary _mockSummary;
+    private StorageScanner _mockSummary;
 
     @BeforeEach
     public void setUp() {
@@ -71,7 +71,7 @@ public class FileBudgetRepositoryTests {
     @DisplayName("ctor :: use null summary :: throws exception")
     public void ctor_nullSummary_throwsException() {
         // arrange
-        StorageSummary nullSummary = null;
+        StorageScanner nullSummary = null;
         // act & assert
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             new FileBudgetRepository(_mockCache, _mockStorage, nullSummary);
@@ -355,31 +355,27 @@ public class FileBudgetRepositoryTests {
         }
     }
 
-    private class MockStorageSummary implements StorageSummary {
-        private boolean _loadCalled = false;
+    private class MockStorageSummary implements StorageScanner {
+        @SuppressWarnings("unused") public boolean _scanCalled = false;
+        @SuppressWarnings("unused") public boolean _sourcesCalled = false;
+        @SuppressWarnings("unused") public boolean _countCalled = false;
 
-        @SuppressWarnings("unused")
-        public boolean loadCalled() {
-            return _loadCalled;
+        public void scan() throws StorageException {
+            _scanCalled = true;
         }
 
-        public void track(String sectionName, String key) {
-            // Mock implementation - do nothing
+        public Iterable<UUID> sources() {
+            _sourcesCalled = true;
+            return new ArrayList<UUID>() { {
+                add(UUID.randomUUID());
+                add(UUID.randomUUID());
+            } };
         }
 
-        public void load() throws StorageException {
-            _loadCalled = true;
-            // Mock implementation - do nothing
+        public int count() {
+            _countCalled = true;
+            return 0;
         }
 
-        public String get(UUID sourceId, String key) {
-            // Mock implementation - return empty string
-            return "";
-        }
-
-        public Iterable<UUID> getSources() {
-            // Mock implementation - return empty list
-            return new ArrayList<>();
-        }
     }
 }

@@ -5,66 +5,55 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.blendwerk.pet.domain.budgeting.Budget;
-import com.blendwerk.pet.domain.budgeting.BudgetView;
-import com.blendwerk.pet.domain.budgeting.Currency;
-import com.blendwerk.pet.domain.budgeting.Money;
 import com.blendwerk.pet.domain.budgeting.Transaction;
 import com.blendwerk.pet.domain.core.DomainException;
 import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.services.Cache;
 import com.blendwerk.pet.infrastructure.services.Storage;
 import com.blendwerk.pet.infrastructure.services.StorageException;
-import com.blendwerk.pet.infrastructure.services.StorageSummary;
+import com.blendwerk.pet.infrastructure.services.StorageScanner;
 
 public final class FileBudgetRepository implements BudgetRepository {
     private final Cache _cache;
     private final Storage _storage;
-    private final StorageSummary _summary;
+    private final StorageScanner _scanner;
     
-    public FileBudgetRepository(Cache cache, Storage storage, StorageSummary summary) {
+    public FileBudgetRepository(Cache cache, Storage storage, StorageScanner scanner) {
         if (cache == null) {
             throw new IllegalArgumentException("Cache cannot be null.");
         }
         if (storage == null) {
             throw new IllegalArgumentException("Storage cannot be null.");
         }
-        if (summary == null) {
-            throw new IllegalArgumentException("Storage summary cannot be null.");
+        if (scanner == null) {
+            throw new IllegalArgumentException("Storage scanner cannot be null.");
         }
         _cache = cache;
         _storage = storage;
-        _summary = summary;  
+        _scanner = scanner;
     }
 
-    public Iterable<BudgetView> getViews() throws RepositoryException {
-        var views = new ArrayList<BudgetView>();
+    public Stream<Budget> all() throws RepositoryException {
+        var budgets = new ArrayList<Budget>();
 
         try {
-            _summary.track("Budget", "ID");
-            _summary.track("Budget", "Name");
-            _summary.track("Budget", "Currency");
-            _summary.track("Budget", "Balance");
-            _summary.load();
-
-            for (var sourceId : _summary.getSources()) {
-                var idStr = _summary.get(sourceId, "ID");
-                var name = _summary.get(sourceId, "Name");
-                var currencyStr = _summary.get(sourceId, "Currency");
-                var balanceStr = _summary.get(sourceId, "Balance");
-
-                var id = Identifier.of(idStr);
-                var balance = Money.of(balanceStr, Currency.valueOf(currencyStr));
-                
-                var view = new BudgetView(id, name, balance);
-                views.add(view);
+            _scanner.scan();
+            var sources = _scanner.sources();
+            for (var source : sources) {
+                var id = new Identifier(source);                
+                var budget = get(id);                
+                budgets.add(budget);
             }
         } catch (StorageException ex) {
             throw new RepositoryException("Could not retrieve budget views: storage not available.", ex);
         }
 
-        return views;
+        return budgets.stream();
     }
 
     public Budget get(Identifier id) throws RepositoryException {
@@ -91,7 +80,14 @@ public final class FileBudgetRepository implements BudgetRepository {
                 rebuilder.withId(budgetId)
                          .withProperties(budgetName, budgetCurrency);
 
+                var uuidRegex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+                var pattern = Pattern.compile(uuidRegex);
+
                 for (var section : _storage.getSections()) {
+                    if (!pattern.matcher(section).matches()) {
+                        continue;
+                    }
+
                     var transactionSign = _storage.get(section, "Sign");
                     var transactionAmount = _storage.get(section, "Amount");
                     var transactionCurrency = _storage.get(section, "Currency");
@@ -114,7 +110,7 @@ public final class FileBudgetRepository implements BudgetRepository {
                 }
                 var balance = new BigDecimal(budgetBalance)
                     .setScale(8, RoundingMode.HALF_UP);
-                if (budget.balance().value() != balance) {
+                if (!budget.balance().value().equals(balance)) {
                     throw new RepositoryException("Could not reconstruct a budget: balance mismatch.");
                 }
 
@@ -143,7 +139,7 @@ public final class FileBudgetRepository implements BudgetRepository {
             _storage.set("Budget", "Name", budget.name());
             _storage.set("Budget", "Currency", budget.currency().toString());
             _storage.set("Budget", "TransactionCount", String.valueOf(budget.stream().count()));
-            _storage.set("Budget", "Balance", String.valueOf(budget.balance().value()));
+            _storage.set("Budget", "Balance", budget.balance().value().toPlainString());
             
             var i = budget.stream()
                 .sorted(Comparator.comparing(Transaction::category))
@@ -152,7 +148,7 @@ public final class FileBudgetRepository implements BudgetRepository {
                 var item = i.next();
                 var sectionName = item.id().value().toString();
                 _storage.set(sectionName, "Sign", String.valueOf(item.sign()));
-                _storage.set(sectionName, "Amount", item.amount().value().toString());
+                _storage.set(sectionName, "Amount", item.amount().value().toPlainString());
                 _storage.set(sectionName, "Currency", item.amount().currency().toString());
                 _storage.set(sectionName, "Category", item.category());
             }
