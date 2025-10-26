@@ -241,6 +241,12 @@ public class MainWindow extends JFrame implements View {
         var editButton = new JButton("Edit Transaction");
         var deleteButton = new JButton("Delete Transaction");
         
+        transactionTypeLabel.setName("TransactionTypeLabel");
+        transactionCategoryLabel.setName("TransactionCategoryLabel");
+        transactionAmountLabel.setName("TransactionAmountLabel");
+        transactionCurrencyLabel.setName("TransactionCurrencyLabel");
+        transactionIdLabel.setName("TransactionIdLabel");
+        
         transactionIdLabel.setFont(transactionIdLabel.getFont().deriveFont(Font.PLAIN, 10f));
         transactionIdLabel.setForeground(Color.GRAY);
         transactionTypeLabel.setFont(transactionTypeLabel.getFont().deriveFont(Font.BOLD, 16f));        
@@ -363,6 +369,20 @@ public class MainWindow extends JFrame implements View {
         table.getColumnModel().getColumn(1).setPreferredWidth(100); // Amount
         table.getColumnModel().getColumn(2).setPreferredWidth(100); // Currency
         table.getColumnModel().getColumn(3).setPreferredWidth(400); // Category
+        
+        // Add selection listener to update details panel
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0) {
+                    String type = (String) table.getValueAt(selectedRow, 0);
+                    String amount = (String) table.getValueAt(selectedRow, 1);
+                    String currency = (String) table.getValueAt(selectedRow, 2);
+                    String category = (String) table.getValueAt(selectedRow, 3);
+                    onSelectTransaction(type, amount, currency, category);
+                }
+            }
+        });
 
         var scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Transactions"));
@@ -427,6 +447,47 @@ public class MainWindow extends JFrame implements View {
         }
         for (var listener : _listeners) {
             listener.requestSelectBudget(budget.id().toString());
+        }
+    }
+    
+    private void onSelectTransaction(String type, String amount, String currency, String category) {
+        // Update the details panel with the selected transaction info
+        var typeLabel = (JLabel) findComponent(_detailsPanel, "TransactionTypeLabel").orElse(null);
+        var categoryLabel = (JLabel) findComponent(_detailsPanel, "TransactionCategoryLabel").orElse(null);
+        var amountLabel = (JLabel) findComponent(_detailsPanel, "TransactionAmountLabel").orElse(null);
+        var currencyLabel = (JLabel) findComponent(_detailsPanel, "TransactionCurrencyLabel").orElse(null);
+        
+        if (typeLabel != null) {
+            typeLabel.setText(type);
+        }
+        if (categoryLabel != null) {
+            categoryLabel.setText(category);
+        }
+        if (amountLabel != null) {
+            amountLabel.setText(amount);
+        }
+        if (currencyLabel != null) {
+            currencyLabel.setText(currency);
+        }
+    }
+    
+    private void clearTransactionDetails() {
+        var typeLabel = (JLabel) findComponent(_detailsPanel, "TransactionTypeLabel").orElse(null);
+        var categoryLabel = (JLabel) findComponent(_detailsPanel, "TransactionCategoryLabel").orElse(null);
+        var amountLabel = (JLabel) findComponent(_detailsPanel, "TransactionAmountLabel").orElse(null);
+        var currencyLabel = (JLabel) findComponent(_detailsPanel, "TransactionCurrencyLabel").orElse(null);
+        
+        if (typeLabel != null) {
+            typeLabel.setText("No Transaction Selected");
+        }
+        if (categoryLabel != null) {
+            categoryLabel.setText("Category: -");
+        }
+        if (amountLabel != null) {
+            amountLabel.setText("Amount: -");
+        }
+        if (currencyLabel != null) {
+            currencyLabel.setText("Currency: -");
         }
     }
 
@@ -527,6 +588,7 @@ public class MainWindow extends JFrame implements View {
         var tableModel = (DefaultTableModel)table.getModel();
 
         tableModel.setRowCount(0);
+        clearTransactionDetails(); // Clear details panel when budget changes
 
         var selectedBudgetOpt = model.getSelectedBudget();
         if (selectedBudgetOpt.isPresent()) {
