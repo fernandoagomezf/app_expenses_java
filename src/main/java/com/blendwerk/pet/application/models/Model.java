@@ -113,7 +113,7 @@ public class Model {
             _repository.delete(budget.id());    
             _selectedBudget = Optional.empty();
             _selectedTransaction = Optional.empty();
-            notifyBudgetUpdated(null);
+            notifyBudgetDeleted(null);
         } catch (Exception ex) {
             notifyError("Could not delete budget: " + ex.getMessage());
         }
@@ -165,6 +165,12 @@ public class Model {
     private void notifyBudgetUpdated(Budget budget) {
         for (ModelListener listener : _listeners) {
             listener.onBudgetUpdated(budget);
+        }
+    }
+
+    private void notifyBudgetDeleted(String budgetId) {
+        for (ModelListener listener : _listeners) {
+            listener.onBudgetDeleted();
         }
     }
     

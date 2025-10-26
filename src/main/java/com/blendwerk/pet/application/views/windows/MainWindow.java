@@ -121,11 +121,16 @@ public class MainWindow extends JFrame implements View {
             newBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
             newBudgetItem.setIcon(loadIcon("icons8-budget-48.png"));
             newBudgetItem.addActionListener(e -> onCreateNewBudget());                    
+            JMenuItem deleteBudgetItem = new JMenuItem("Delete Budget");
+            deleteBudgetItem.setMnemonic(KeyEvent.VK_D);
+            deleteBudgetItem.setIcon(loadIcon("icons8-trash-48.png"));
+            deleteBudgetItem.addActionListener(e -> onDeleteBudget());
             JMenuItem exitItem = new JMenuItem("Exit");
             exitItem.setMnemonic(KeyEvent.VK_X);
             exitItem.setIcon(loadIcon("icons8-close-48.png"));
             exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(newBudgetItem);
+        fileMenu.add(deleteBudgetItem);
         fileMenu.addSeparator();        
         fileMenu.add(exitItem);
         
@@ -136,7 +141,12 @@ public class MainWindow extends JFrame implements View {
             addTransactionItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
             addTransactionItem.setIcon(loadIcon("icons8-transaction-48.png"));
             addTransactionItem.addActionListener(e -> onAddTransaction());
+            JMenuItem deleteTransactionItem = new JMenuItem("Delete Transaction");
+            deleteTransactionItem.setMnemonic(KeyEvent.VK_D);
+            deleteTransactionItem.setIcon(loadIcon("icons8-delete-dollar-48.png"));
+            deleteTransactionItem.addActionListener(e -> onDeleteTransaction());
         editMenu.add(addTransactionItem);
+        editMenu.add(deleteTransactionItem);
         
         JMenu viewMenu = new JMenu("View");
         viewMenu.setMnemonic(KeyEvent.VK_V); 
@@ -168,13 +178,26 @@ public class MainWindow extends JFrame implements View {
         JButton newBudgetButton = new JButton(loadIcon("icons8-budget-48.png"));
         newBudgetButton.setToolTipText("Create new budget");
         newBudgetButton.addActionListener(e -> onCreateNewBudget());  
+        JButton deleteBudgetButton = new JButton(loadIcon("icons8-trash-48.png"));
+        deleteBudgetButton.setToolTipText("Delete selected budget");
+        deleteBudgetButton.addActionListener(e -> onDeleteBudget());
         JButton addTransactionButton = new JButton(loadIcon("icons8-transaction-48.png"));
         addTransactionButton.setToolTipText("Add new transaction");
         addTransactionButton.addActionListener(e -> onAddTransaction());      
+        JButton deleteTransactionButton = new JButton(loadIcon("icons8-delete-dollar-48.png"));
+        deleteTransactionButton.setToolTipText("Delete selected transaction");
+        deleteTransactionButton.addActionListener(e -> onDeleteTransaction());
+        JButton refreshButton = new JButton(loadIcon("icons8-refresh-48.png"));
+        refreshButton.setToolTipText("Refresh data");
+        refreshButton.addActionListener(e -> onRefresh());
         
         toolBar.add(newBudgetButton);
+        toolBar.add(deleteBudgetButton);
         toolBar.addSeparator();
         toolBar.add(addTransactionButton);
+        toolBar.add(deleteTransactionButton);
+        toolBar.addSeparator();
+        toolBar.add(refreshButton);
         
         return toolBar;
     }
@@ -437,9 +460,21 @@ public class MainWindow extends JFrame implements View {
         }
     }
 
+    private void onDeleteBudget() {
+        for (var listener : _listeners) {
+            listener.requestDeleteBudget();
+        }
+    }
+
     private void onAddTransaction() {
         for (var listener : _listeners) {
             listener.requestNewTransaction();
+        }
+    }
+
+    private void onDeleteTransaction() {
+        for (var listener : _listeners) {
+            listener.requestDeleteTransaction();
         }
     }
 

@@ -35,6 +35,12 @@ public class Controller implements ModelListener, ViewListener {
         updateView();
     }
 
+    public void onBudgetDeleted() {
+        var message = "Budget deleted successfully.";
+        _view.showSuccess(message, false);
+        updateView();
+    }
+
     public void onError(String message) {                
         _view.showError(message);
     }
@@ -86,14 +92,14 @@ public class Controller implements ModelListener, ViewListener {
         _view.showSuccess("Data refreshed.", false);
     }
 
-    public void requestDeleteTransaction(String transactionId) {
-        //_model.deleteTransaction(transactionId);
+    public void requestDeleteTransaction() {
+        _model.deleteTransaction();
         updateView();
         _view.showSuccess("Transaction deleted successfully.", false);
     }
 
-    public void requestDeleteBudget(String budgetId) {
-        //_model.deleteBudget(budgetId);
+    public void requestDeleteBudget() {
+        _model.deleteBudget();
         updateView();
         _view.showSuccess("Budget deleted successfully.", false);
     }
