@@ -452,8 +452,8 @@ public class MainWindow extends JFrame implements View {
         
         Optional<BudgetInput> result = Optional.empty();
         if (dialog.isConfirmed()) {
-            String budgetName = dialog.getBudgetName();
-            String currency = dialog.getCurrency();
+            var budgetName = dialog.getBudgetName();
+            var currency = dialog.getCurrency();
             
             var input = new BudgetInput(budgetName, currency);
             result = Optional.of(input);
@@ -468,10 +468,11 @@ public class MainWindow extends JFrame implements View {
         
         Optional<TransactionInput> result = Optional.empty();
         if (dialog.isConfirmed()) {
-            // Collect transaction data from dialog (not implemented yet)
-            // var input = new TransactionInput(...);
-            // result = Optional.of(input);
-            var input = new TransactionInput("42.00", "MXN", "OTHER", "Income");
+            var type = dialog.getType();
+            var category = dialog.getCategory();
+            var amount = String.valueOf(dialog.getAmount());
+            var currency = dialog.getCurrency();
+            var input = new TransactionInput(amount, currency, category, type);
             result = Optional.of(input);
         }
 
