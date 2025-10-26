@@ -139,7 +139,12 @@ public class MainWindow extends JFrame implements View {
         editMenu.add(addTransactionItem);
         
         JMenu viewMenu = new JMenu("View");
-        viewMenu.setMnemonic(KeyEvent.VK_V);              
+        viewMenu.setMnemonic(KeyEvent.VK_V); 
+            JMenuItem refreshItem = new JMenuItem("Refresh");
+            refreshItem.setMnemonic(KeyEvent.VK_R);
+            refreshItem.setIcon(loadIcon("icons8-refresh-48.png"));             
+            refreshItem.addActionListener(e -> onRefresh());
+        viewMenu.add(refreshItem);
         
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);        
@@ -682,6 +687,12 @@ public class MainWindow extends JFrame implements View {
         treeModel.reload();
         for (int i = 0; i < tree.getRowCount(); i++) {
             tree.expandRow(i);
+        }
+    }
+
+    private void onRefresh() {
+        for (var listener : _listeners) {
+            listener.requestRefresh();
         }
     }
 }

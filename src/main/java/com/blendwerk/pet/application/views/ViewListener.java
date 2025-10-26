@@ -6,4 +6,7 @@ public interface ViewListener {
     void requestSelectBudget(String budgetId);
     void requestNewTransaction();
     void requestSelectTransaction(String transactionId);
+    void requestRefresh();
+    void requestDeleteTransaction(String transactionId);
+    void requestDeleteBudget(String budgetId);
 }

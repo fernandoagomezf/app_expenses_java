@@ -80,4 +80,21 @@ public class Controller implements ModelListener, ViewListener {
         var msg = "Transaction selected: " + _model.getSelectedTransaction().get().toString();
         _view.showSuccess(msg, false);
     }
+
+    public void requestRefresh() {
+        updateView();
+        _view.showSuccess("Data refreshed.", false);
+    }
+
+    public void requestDeleteTransaction(String transactionId) {
+        //_model.deleteTransaction(transactionId);
+        updateView();
+        _view.showSuccess("Transaction deleted successfully.", false);
+    }
+
+    public void requestDeleteBudget(String budgetId) {
+        //_model.deleteBudget(budgetId);
+        updateView();
+        _view.showSuccess("Budget deleted successfully.", false);
+    }
 }
