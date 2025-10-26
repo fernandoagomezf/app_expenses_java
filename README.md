@@ -1,5 +1,11 @@
 # Personal Expense Tracker (PET)
 
+[![Java](https://img.shields.io/badge/Java-SE-orange?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Swing](https://img.shields.io/badge/GUI-Swing-blue?style=flat-square&logo=java&logoColor=white)](https://docs.oracle.com/javase/tutorial/uiswing/)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-green?style=flat-square)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+[![DDD](https://img.shields.io/badge/Design-Domain%20Driven-purple?style=flat-square)](https://martinfowler.com/bliki/DomainDrivenDesign.html)
+[![License](https://img.shields.io/badge/License-Educational-lightgrey?style=flat-square)](#license)
+
 A desktop application for managing personal budgets, tracking income and expenses, built with Java Swing following Domain-Driven Design principles and Clean Architecture.
 
 ## Table of Contents
