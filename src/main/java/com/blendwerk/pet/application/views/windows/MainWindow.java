@@ -214,6 +214,7 @@ public class MainWindow extends JFrame implements View {
 
         var statusLabel = new JLabel("Ready");
         statusLabel.setHorizontalAlignment(JLabel.CENTER);
+        statusLabel.setName("StatusMessage");
         var leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
         leftPanel.add(statusLabel);        
         panel.add(leftPanel, BorderLayout.WEST);
@@ -428,6 +429,10 @@ public class MainWindow extends JFrame implements View {
         if (message == null) {
             throw new IllegalArgumentException("Message cannot be null");
         }
+
+        var statusLabel = (JLabel)findComponent(_statusPanel, "StatusMessage").get();
+        statusLabel.setText("Error: " + message);
+
         JOptionPane.showMessageDialog(
             this,
             message,
@@ -437,16 +442,22 @@ public class MainWindow extends JFrame implements View {
         
     }
 
-    public void showSuccess(String message) {
+    public void showSuccess(String message, boolean echo) {
         if (message == null) {
             throw new IllegalArgumentException("Message cannot be null");
         }
-        JOptionPane.showMessageDialog(
-            this,
-            message,
-            "Success",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        
+        var statusLabel = (JLabel)findComponent(_statusPanel, "StatusMessage").get();
+        statusLabel.setText(message);
+
+        if (echo) {
+            JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }
 
     public Optional<BudgetInput> getNewBudget() {

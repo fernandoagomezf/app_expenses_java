@@ -9,7 +9,7 @@ public interface View {
     Optional<BudgetInput> getNewBudget();
     Optional<TransactionInput> getNewTransaction();
     void showError(String message);
-    void showSuccess(String message);
+    void showSuccess(String message, boolean echo);
     void showAbout();
     void addListener(ViewListener listener);
     void removeListener(ViewListener listener);

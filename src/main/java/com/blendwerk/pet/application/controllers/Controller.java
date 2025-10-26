@@ -25,13 +25,13 @@ public class Controller implements ModelListener, ViewListener {
 
     public void onBudgetCreated(Budget budget) {
         var message = "Budget '" + budget.name() + "' created successfully.";
-        _view.showSuccess(message);
+        _view.showSuccess(message, false);
         updateView();
     }
 
     public void onBudgetUpdated(Budget budget) {
         var message = "Budget '" + budget.name() + "' updated successfully.";
-        _view.showSuccess(message);
+        _view.showSuccess(message, false);
         updateView();
     }
 
@@ -58,6 +58,8 @@ public class Controller implements ModelListener, ViewListener {
     public void requestSelectBudget(String budgetId) {
         _model.select(budgetId);
         updateView();
+        var msg = "Budget selected: " + _model.getSelectedBudget().get().name();
+        _view.showSuccess(msg, false);
     }
 
     public void requestNewTransaction() {
