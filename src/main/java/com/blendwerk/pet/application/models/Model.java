@@ -17,7 +17,8 @@ import com.blendwerk.pet.infrastructure.repositories.BudgetRepository;
 public class Model {
     private final BudgetRepository _repository;
     private final List<ModelListener> _listeners;
-    private Optional<Budget> _selected;
+    private Optional<Budget> _selectedBudget;
+    private Optional<Transaction> _selectedTransaction;
     
     public Model(BudgetRepository repository) {
         if (repository == null) {
@@ -25,7 +26,8 @@ public class Model {
         }
         _repository = repository;
         _listeners = new CopyOnWriteArrayList<>();
-        _selected = Optional.empty();
+        _selectedBudget = Optional.empty();
+        _selectedTransaction = Optional.empty();
     }
     
     public void addListener(ModelListener listener) {
@@ -100,7 +102,7 @@ public class Model {
         try {            
             var validation = input.validate();
             if (validation.isValid()) {
-                Budget budget = _selected.orElseThrow(() -> new IllegalStateException("No budget selected."));
+                Budget budget = _selectedBudget.orElseThrow(() -> new IllegalStateException("No budget selected."));
                 var currency = Currency.valueOf(input.currency());
                 var amount = Money.of(input.amount(), currency);
                 
@@ -147,22 +149,48 @@ public class Model {
     }
 
     public Optional<Budget> getSelectedBudget() {
-        return _selected;
+        return _selectedBudget;
     }
 
-    public void select(String budgetId) {
+    public void selectBudget(String budgetId) {
         if (budgetId == null || budgetId.trim().isEmpty()) {
-            _selected = Optional.empty();
+            _selectedBudget = Optional.empty();
             return;
         }
 
         try {
             var id = Identifier.of(budgetId);
             var budget = _repository.get(id);
-            _selected = Optional.of(budget);
+            _selectedBudget = Optional.of(budget);
         } catch (Exception ex) {
             notifyError("Could not select budget: " + ex.getMessage());
-            _selected = Optional.empty();
+            _selectedBudget = Optional.empty();
+        }
+    }
+
+    public Optional<Transaction> getSelectedTransaction() {
+        return _selectedTransaction;
+    }
+
+    public void selectTransaction(String transactionId) {
+        if (transactionId == null || transactionId.trim().isEmpty()) {
+            _selectedTransaction = Optional.empty();
+            return;
+        }
+
+        try {
+            Budget budget = _selectedBudget.orElseThrow(() -> new IllegalStateException("No budget selected."));
+            var id = Identifier.of(transactionId);
+            var transaction = budget.find(id);
+            if (transaction.isPresent()) {
+                _selectedTransaction = transaction;
+            } else {
+                notifyError("Could not find transaction with ID: " + transactionId);
+                _selectedTransaction = Optional.empty();
+            }
+        } catch (Exception ex) {
+            notifyError("Could not select transaction: " + ex.getMessage());
+            _selectedTransaction = Optional.empty();
         }
     }
 }

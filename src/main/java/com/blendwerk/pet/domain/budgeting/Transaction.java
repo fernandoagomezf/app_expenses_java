@@ -106,4 +106,8 @@ public abstract class Transaction implements Entity {
     }
 
     public static final String CATEGORY_GENERAL = "General";
+
+    public String toString() {
+        return _amount.toString() + " - " + _category;
+    }
 }

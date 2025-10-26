@@ -5,4 +5,5 @@ public interface ViewListener {
     void requestNewBudget();
     void requestSelectBudget(String budgetId);
     void requestNewTransaction();
+    void requestSelectTransaction(String transactionId);
 }

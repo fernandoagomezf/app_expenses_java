@@ -49,6 +49,7 @@ import com.blendwerk.pet.application.views.ViewListener;
 import com.blendwerk.pet.application.views.controls.TransactionTableCellRenderer;
 import com.blendwerk.pet.application.views.controls.TreeCellRenderer;
 import com.blendwerk.pet.domain.budgeting.Budget;
+import com.blendwerk.pet.domain.budgeting.Transaction;
 
 public class MainWindow extends JFrame implements View {
     private JMenuBar _menuBar;
@@ -370,16 +371,12 @@ public class MainWindow extends JFrame implements View {
         table.getColumnModel().getColumn(2).setPreferredWidth(100); // Currency
         table.getColumnModel().getColumn(3).setPreferredWidth(400); // Category
         
-        // Add selection listener to update details panel
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = table.getSelectedRow();
-                if (selectedRow >= 0) {
-                    String type = (String) table.getValueAt(selectedRow, 0);
-                    String amount = (String) table.getValueAt(selectedRow, 1);
-                    String currency = (String) table.getValueAt(selectedRow, 2);
-                    String category = (String) table.getValueAt(selectedRow, 3);
-                    onSelectTransaction(type, amount, currency, category);
+                if (selectedRow >= 0) {                    
+                    var transactionId = (String)table.getClientProperty(selectedRow);
+                    onSelectTransaction(transactionId);
                 }
             }
         });
@@ -449,8 +446,17 @@ public class MainWindow extends JFrame implements View {
             listener.requestSelectBudget(budget.id().toString());
         }
     }
+
+    private void onSelectTransaction(String transactionId) {
+        if (transactionId == null) {
+            throw new IllegalArgumentException("Transaction ID cannot be null");
+        }
+        for (var listener : _listeners) {
+            listener.requestSelectTransaction(transactionId);
+        }
+    }
     
-    private void onSelectTransaction(String type, String amount, String currency, String category) {
+    private void selectTransaction(String type, String amount, String currency, String category) {
         var typeLabel = (JLabel) findComponent(_detailsPanel, "TransactionTypeLabel").orElse(null);
         var categoryLabel = (JLabel) findComponent(_detailsPanel, "TransactionCategoryLabel").orElse(null);
         var amountLabel = (JLabel) findComponent(_detailsPanel, "TransactionAmountLabel").orElse(null);
@@ -469,8 +475,6 @@ public class MainWindow extends JFrame implements View {
             currencyLabel.setText(currency);
         }
 
-        var msg = type + " - " + amount + " " + currency;
-        showSuccess(msg, false);
     }
     
     private void clearTransactionDetails() {
@@ -578,6 +582,7 @@ public class MainWindow extends JFrame implements View {
         }
         updateTreePanel(model);
         updateDataPanel(model);
+        updateDetailsPanel(model);
     }
 
     private void updateDataPanel(Model model) {
@@ -590,7 +595,6 @@ public class MainWindow extends JFrame implements View {
         var tableModel = (DefaultTableModel)table.getModel();
 
         tableModel.setRowCount(0);
-        clearTransactionDetails(); // Clear details panel when budget changes
 
         var selectedBudgetOpt = model.getSelectedBudget();
         if (selectedBudgetOpt.isPresent()) {
@@ -611,6 +615,7 @@ public class MainWindow extends JFrame implements View {
             }
 
             var transactions = budget.stream().collect(Collectors.toList());
+            var idx = 0;
             for (var transaction : transactions) {
                 Object[] rowData = {
                     transaction.sign() >= 0 ? "Income" : "Expense",
@@ -619,6 +624,8 @@ public class MainWindow extends JFrame implements View {
                     transaction.category()
                 };
                 tableModel.addRow(rowData);
+                table.putClientProperty(idx, transaction.id().toString());
+                idx++;
             }
             
             var cellRenderer = new TransactionTableCellRenderer();
@@ -633,7 +640,24 @@ public class MainWindow extends JFrame implements View {
             incomeLabel.setText("-");
             expensesLabel.setText("-");
             balanceLabel.setText(String.format("Balance: -"));
-            balanceLabel.setForeground(Color.BLACK); // Reset to black when no budget selected
+            balanceLabel.setForeground(Color.BLACK);
+        }
+
+        
+    }
+
+    private void updateDetailsPanel(Model model) {
+        var selectedTransactionOpt = model.getSelectedTransaction();
+        if (selectedTransactionOpt.isPresent()) {
+            var transaction = selectedTransactionOpt.get();
+            selectTransaction(
+                transaction.sign() >= 0 ? "Income" : "Expense",
+                transaction.amount().toString(),
+                transaction.amount().currency().toString(),
+                transaction.category()
+            );
+        } else {
+            clearTransactionDetails();
         }
     }
     

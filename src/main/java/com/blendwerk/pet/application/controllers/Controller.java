@@ -56,7 +56,7 @@ public class Controller implements ModelListener, ViewListener {
     }
 
     public void requestSelectBudget(String budgetId) {
-        _model.select(budgetId);
+        _model.selectBudget(budgetId);
         updateView();
         var msg = "Budget selected: " + _model.getSelectedBudget().get().name();
         _view.showSuccess(msg, false);
@@ -72,5 +72,12 @@ public class Controller implements ModelListener, ViewListener {
         } else {
             _view.showError("No budget selected. Please select a budget first.");
         }
+    }
+
+    public void requestSelectTransaction(String transactionId) {
+        _model.selectTransaction(transactionId);
+        updateView();
+        var msg = "Transaction selected: " + _model.getSelectedTransaction().get().toString();
+        _view.showSuccess(msg, false);
     }
 }
