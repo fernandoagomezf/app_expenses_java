@@ -49,7 +49,6 @@ import com.blendwerk.pet.application.views.ViewListener;
 import com.blendwerk.pet.application.views.controls.TransactionTableCellRenderer;
 import com.blendwerk.pet.application.views.controls.TreeCellRenderer;
 import com.blendwerk.pet.domain.budgeting.Budget;
-import com.blendwerk.pet.domain.budgeting.Transaction;
 
 public class MainWindow extends JFrame implements View {
     private JMenuBar _menuBar;
@@ -145,6 +144,7 @@ public class MainWindow extends JFrame implements View {
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);        
             JMenuItem aboutItem = new JMenuItem("About");
+            aboutItem.setIcon(loadIcon("icons8-about-48.png"));
             aboutItem.addActionListener(e -> showAbout());
         helpMenu.add(aboutItem);
         
