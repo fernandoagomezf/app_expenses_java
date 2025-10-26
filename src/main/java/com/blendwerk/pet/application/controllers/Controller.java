@@ -1,16 +1,16 @@
 package com.blendwerk.pet.application.controllers;
 
-import com.blendwerk.pet.application.models.BudgetModel;
-import com.blendwerk.pet.application.models.BudgetModelListener;
-import com.blendwerk.pet.application.views.MainView;
-import com.blendwerk.pet.application.views.MainViewListener;
+import com.blendwerk.pet.application.models.Model;
+import com.blendwerk.pet.application.models.ModelListener;
+import com.blendwerk.pet.application.views.View;
+import com.blendwerk.pet.application.views.ViewListener;
 import com.blendwerk.pet.domain.budgeting.Budget;
 
-public class MainController implements BudgetModelListener, MainViewListener {
-    private final BudgetModel _model;
-    private final MainView _view;
+public class Controller implements ModelListener, ViewListener {
+    private final Model _model;
+    private final View _view;
     
-    public MainController(BudgetModel model, MainView view) {
+    public Controller(Model model, View view) {
         if (model == null) {
             throw new IllegalArgumentException("Model cannot be null");
         }
@@ -51,5 +51,10 @@ public class MainController implements BudgetModelListener, MainViewListener {
     
     public void updateView() {
         _view.updateModel(_model);
+    }
+
+    public void requestSelectBudget(String budgetId) {
+        _model.select(budgetId);
+        updateView();
     }
 }

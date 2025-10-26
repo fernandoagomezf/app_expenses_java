@@ -9,25 +9,27 @@ import com.blendwerk.pet.domain.budgeting.Budget;
 import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.repositories.BudgetRepository;
 
-public class BudgetModel {
+public class Model {
     private final BudgetRepository _repository;
-    private final List<BudgetModelListener> _listeners;
+    private final List<ModelListener> _listeners;
+    private Optional<Budget> _selected;
     
-    public BudgetModel(BudgetRepository repository) {
+    public Model(BudgetRepository repository) {
         if (repository == null) {
             throw new IllegalArgumentException("Repository cannot be null");
         }
         _repository = repository;
         _listeners = new CopyOnWriteArrayList<>();
+        _selected = Optional.empty();
     }
     
-    public void addListener(BudgetModelListener listener) {
+    public void addListener(ModelListener listener) {
         if (listener != null) {
             _listeners.add(listener);
         }
     }
     
-    public void removeListener(BudgetModelListener listener) {
+    public void removeListener(ModelListener listener) {
         _listeners.remove(listener);
     }
 
@@ -85,14 +87,34 @@ public class BudgetModel {
     }
     
     private void notifyBudgetCreated(Budget budget) {
-        for (BudgetModelListener listener : _listeners) {
+        for (ModelListener listener : _listeners) {
             listener.onBudgetCreated(budget);
         }
     }
     
     private void notifyError(String message) {
-        for (BudgetModelListener listener : _listeners) {
+        for (ModelListener listener : _listeners) {
             listener.onError(message);
+        }
+    }
+
+    public Optional<Budget> getSelectedBudget() {
+        return _selected;
+    }
+
+    public void select(String budgetId) {
+        if (budgetId == null || budgetId.trim().isEmpty()) {
+            _selected = Optional.empty();
+            return;
+        }
+
+        try {
+            var id = Identifier.of(budgetId);
+            var budget = _repository.get(id);
+            _selected = Optional.of(budget);
+        } catch (Exception ex) {
+            notifyError("Could not select budget: " + ex.getMessage());
+            _selected = Optional.empty();
         }
     }
 }

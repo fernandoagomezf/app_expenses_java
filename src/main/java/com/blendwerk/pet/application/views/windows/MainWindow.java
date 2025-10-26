@@ -34,18 +34,21 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
-import com.blendwerk.pet.application.models.BudgetModel;
+import com.blendwerk.pet.application.models.Model;
 import com.blendwerk.pet.application.models.CreateBudgetInput;
-import com.blendwerk.pet.application.views.MainView;
-import com.blendwerk.pet.application.views.MainViewListener;
+import com.blendwerk.pet.application.views.View;
+import com.blendwerk.pet.application.views.ViewListener;
 import com.blendwerk.pet.application.views.controls.TreeCellRenderer;
+import com.blendwerk.pet.domain.budgeting.Budget;
 
-public class MainWindow extends JFrame implements MainView {
+public class MainWindow extends JFrame implements View {
     private JMenuBar _menuBar;
     private JToolBar _toolBar;
     private JPanel _statusPanel;
@@ -54,7 +57,7 @@ public class MainWindow extends JFrame implements MainView {
     private JPanel _detailsPanel;
     private JSplitPane _leftSplitPane;
     private JSplitPane _rightSplitPane;
-    private final List<MainViewListener> _listeners;
+    private final List<ViewListener> _listeners;
     
     public MainWindow() {
         _listeners = new CopyOnWriteArrayList<>();
@@ -166,8 +169,6 @@ public class MainWindow extends JFrame implements MainView {
         var treeModel = new DefaultTreeModel(rootNode);
         var tree = new JTree(treeModel);
         var scrollPane = new JScrollPane(tree);
-        var treeToolBar = new JToolBar(JToolBar.HORIZONTAL);
-        var refreshButton= new JButton("Refresh");
         
         tree.setName("BudgetSummaryTree");
         tree.setRootVisible(true);
@@ -175,19 +176,25 @@ public class MainWindow extends JFrame implements MainView {
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.setCellRenderer(new TreeCellRenderer());
         scrollPane.setPreferredSize(new Dimension(250, 0));
-        treeToolBar.setFloatable(false);
-        refreshButton.setToolTipText("Refresh budget tree");
-        refreshButton.addActionListener(e -> {
-            treeModel.reload();
-            for (int i = 0; i < tree.getRowCount(); i++) {
-                tree.expandRow(i);
+        
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                TreePath selectedPath = tree.getSelectionPath();
+                if (selectedPath != null) {
+                    var lastComponent = selectedPath.getLastPathComponent();
+                    if (lastComponent instanceof DefaultMutableTreeNode) {
+                        var selectedNode = (DefaultMutableTreeNode) lastComponent;
+                        var selectedBudget = selectedNode.getUserObject();
+                        if (selectedBudget instanceof Budget) {
+                            onSelectBudget((Budget)selectedBudget);
+                        }
+                    }
+                }
             }
-        });        
-        treeToolBar.add(refreshButton);
+        });
         
         panel.add(scrollPane, BorderLayout.CENTER);
-        panel.add(treeToolBar, BorderLayout.NORTH);
-
+        
         return panel;
     }
 
@@ -260,7 +267,6 @@ public class MainWindow extends JFrame implements MainView {
         
         panel.add(headerPanel, BorderLayout.NORTH);
         
-        
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         actionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));        
         actionsPanel.add(editButton);
@@ -304,7 +310,7 @@ public class MainWindow extends JFrame implements MainView {
         gbc.gridy = 0;
         summaryPanel.add(new JLabel("Total Income:"), gbc);
         gbc.gridx = 3;
-        var incomeLabel = new JLabel(String.format("$%.2f", 0.0));
+        var incomeLabel = new JLabel("-");
         incomeLabel.setFont(incomeLabel.getFont().deriveFont(Font.BOLD));
         incomeLabel.setName("BudgetIncomeLabel");
         summaryPanel.add(incomeLabel, gbc);
@@ -313,7 +319,7 @@ public class MainWindow extends JFrame implements MainView {
         gbc.gridy = 1;
         summaryPanel.add(new JLabel("Total Expenses:"), gbc);
         gbc.gridx = 3;
-        var expensesLabel = new JLabel(String.format("$%.2f", 0.0));
+        var expensesLabel = new JLabel("-");
         expensesLabel.setFont(expensesLabel.getFont().deriveFont(Font.BOLD));
         expensesLabel.setName("BudgetExpensesLabel");
         summaryPanel.add(expensesLabel, gbc);
@@ -321,7 +327,7 @@ public class MainWindow extends JFrame implements MainView {
         gbc.gridx = 4; 
         gbc.gridy = 0; 
         gbc.gridheight = 2;
-        var balanceLabel = new JLabel(String.format("Balance: $%.2f", 0.0));
+        var balanceLabel = new JLabel(String.format("Balance: -"));
         balanceLabel.setFont(balanceLabel.getFont().deriveFont(Font.BOLD, 16f));
         balanceLabel.setName("BudgetBalanceLabel");
         summaryPanel.add(balanceLabel, gbc);
@@ -352,14 +358,42 @@ public class MainWindow extends JFrame implements MainView {
         return panel;
     }
 
-    public void addListener(MainViewListener listener) {
+    public void addListener(ViewListener listener) {
         if (listener != null) {
             _listeners.add(listener);
         }
     }
 
-    public void removeListener(MainViewListener listener) {
+    public void removeListener(ViewListener listener) {
         _listeners.remove(listener);
+    }
+
+    private Optional<Component> findComponent(Container container, String name) {      
+        if (container == null) {
+            throw new IllegalArgumentException("Container cannot be null");
+        }  
+        if (name == null) {
+            throw new IllegalArgumentException("Name cannot be null");
+        }
+
+        if (name.equals(container.getName())) {
+            return Optional.of(container);
+        }
+        
+        for (var component : container.getComponents()) {
+            if (name.equals(component.getName())) {
+                return Optional.of(component);
+            }
+            
+            if (component instanceof Container) {
+                var found = findComponent((Container)component, name);
+                if (found.isPresent()) {
+                    return found;
+                }
+            }
+        }
+
+        return Optional.empty(); 
     }
     
     private void onCreateNewBudget() {
@@ -368,7 +402,19 @@ public class MainWindow extends JFrame implements MainView {
         }
     }
 
+    private void onSelectBudget(Budget budget) {
+        if (budget == null) {
+            throw new IllegalArgumentException("Budget cannot be null");
+        }
+        for (var listener : _listeners) {
+            listener.requestSelectBudget(budget.id().toString());
+        }
+    }
+
     public void showError(String message) {
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
         JOptionPane.showMessageDialog(
             this,
             message,
@@ -378,6 +424,9 @@ public class MainWindow extends JFrame implements MainView {
     }
 
     public void showSuccess(String message) {
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
         JOptionPane.showMessageDialog(
             this,
             message,
@@ -413,49 +462,61 @@ public class MainWindow extends JFrame implements MainView {
         );
     }
 
-    public void updateModel(BudgetModel model) {
+    public void updateModel(Model model) {
         if (model == null) {
             throw new IllegalArgumentException("Model cannot be null");
         }
         updateTreePanel(model);
+        updateDataPanel(model);
     }
 
-    private Optional<Component> findComponent(Container container, String name) {      
-        if (container == null) {
-            throw new IllegalArgumentException("Container cannot be null");
-        }  
-        if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
-        }
+    private void updateDataPanel(Model model) {
+        var nameLabel = (JLabel)findComponent(_dataPanel, "BudgetNameLabel").get();
+        var currencyLabel = (JLabel)findComponent(_dataPanel, "BudgetCurrencyLabel").get();
+        var incomeLabel = (JLabel)findComponent(_dataPanel, "BudgetIncomeLabel").get();
+        var expensesLabel = (JLabel)findComponent(_dataPanel, "BudgetExpensesLabel").get();
+        var balanceLabel = (JLabel)findComponent(_dataPanel, "BudgetBalanceLabel").get();
+        var table = (JTable)findComponent(_dataPanel, "TransactionTable").get();
+        var tableModel = (DefaultTableModel)table.getModel();
 
-        if (name.equals(container.getName())) {
-            return Optional.of(container);
-        }
-        
-        for (var component : container.getComponents()) {
-            if (name.equals(component.getName())) {
-                return Optional.of(component);
-            }
-            
-            if (component instanceof Container) {
-                var found = findComponent((Container)component, name);
-                if (found.isPresent()) {
-                    return found;
-                }
-            }
-        }
+        tableModel.setRowCount(0);
 
-        return Optional.empty(); 
+        var selectedBudgetOpt = model.getSelectedBudget();
+        if (selectedBudgetOpt.isPresent()) {
+            var budget = selectedBudgetOpt.get();
+            nameLabel.setText(budget.name());
+            currencyLabel.setText(budget.currency().toString());
+            incomeLabel.setText(budget.incomes().toString());
+            expensesLabel.setText(budget.expenses().toString());
+            balanceLabel.setText(budget.balance().toString());
+
+            /*for (var transaction : budget.transactions()) {
+                Object[] rowData = {
+                    transaction.type().toString(),
+                    transaction.category(),
+                    String.format("%s %.2f", budget.currency().symbol(), transaction.amount()),
+                    transaction.date().toString(),
+                    transaction.description()
+                };
+                tableModel.addRow(rowData);
+            }*/
+        } else {
+            nameLabel.setText("-");
+            currencyLabel.setText("-");
+            incomeLabel.setText("-");
+            expensesLabel.setText("-");
+            balanceLabel.setText(String.format("Balance: -"));
+        }
     }
     
-    private void updateTreePanel(BudgetModel model) {
+    private void updateTreePanel(Model model) {
         var tree = (JTree)findComponent(_treePanel, "BudgetSummaryTree").get();
         var treeModel = (DefaultTreeModel)tree.getModel();
         var treeRootNode = (DefaultMutableTreeNode)treeModel.getRoot();
 
         treeRootNode.removeAllChildren();
         for (var budget : model.getAllBudgets()) {
-            var budgetNode = new DefaultMutableTreeNode(budget.name());
+            var budgetNode = new DefaultMutableTreeNode(budget);            
             
             var incomeNode = new DefaultMutableTreeNode("Income: " + budget.incomes().toString());
             var expenseNode = new DefaultMutableTreeNode("Expenses: " + budget.expenses().toString());

@@ -204,4 +204,7 @@ public final class Budget implements Entity {
         };
     }
 
+    public String toString() {
+        return name();
+    }
 }

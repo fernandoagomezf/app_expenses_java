@@ -3,8 +3,8 @@ package com.blendwerk.pet.application;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.blendwerk.pet.application.controllers.MainController;
-import com.blendwerk.pet.application.models.BudgetModel;
+import com.blendwerk.pet.application.controllers.Controller;
+import com.blendwerk.pet.application.models.Model;
 import com.blendwerk.pet.application.views.windows.MainWindow;
 import com.blendwerk.pet.infrastructure.repositories.FileBudgetRepository;
 import com.blendwerk.pet.infrastructure.services.FileStorage;
@@ -32,9 +32,9 @@ public class Program {
         var summary = new FileStorageScanner();
         var repository = new FileBudgetRepository(cache, storage, summary);
         
-        var model = new BudgetModel(repository);
+        var model = new Model(repository);
         var view = new MainWindow();
-        var controller = new MainController(model, view);
+        var controller = new Controller(model, view);
         view.setVisible(true);
         
         controller.updateView();
