@@ -2,7 +2,6 @@ package com.blendwerk.pet.application;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
 import com.blendwerk.pet.application.controllers.Controller;
 import com.blendwerk.pet.application.models.Model;
 import com.blendwerk.pet.application.views.windows.MainWindow;
@@ -26,19 +25,18 @@ public class Program {
         }
     }
 
-    public Program() {       
+    public Program() {
+        // services to be injected
         var cache = new MemoryCache();
         var storage = new FileStorage();
         var summary = new FileStorageScanner();
         var repository = new FileBudgetRepository(cache, storage, summary);
         
+        // model view controller
         var model = new Model(repository);
         var view = new MainWindow();
-        var controller = new Controller(model, view);
         view.setVisible(true);
-        
+        var controller = new Controller(model, view);
         controller.updateView();
-        
-        System.out.println("Personal Expense Tracker started with MVC architecture.");
     }
 }

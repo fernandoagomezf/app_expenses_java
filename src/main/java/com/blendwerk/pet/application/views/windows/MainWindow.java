@@ -16,6 +16,8 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -339,7 +341,7 @@ public class MainWindow extends JFrame implements View {
         
         panel.add(summaryPanel, BorderLayout.NORTH);
 
-        String[] columnNames = {"Type", "Category", "Amount", "Date", "Description"};
+        String[] columnNames = { "Type", "Amount", "Currency", "Category" };
         var tableModel = new DefaultTableModel(columnNames, 0) {
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -351,10 +353,9 @@ public class MainWindow extends JFrame implements View {
         table.setName("TransactionTable");
         
         table.getColumnModel().getColumn(0).setPreferredWidth(80);  // Type
-        table.getColumnModel().getColumn(1).setPreferredWidth(120); // Category
-        table.getColumnModel().getColumn(2).setPreferredWidth(100); // Amount
-        table.getColumnModel().getColumn(3).setPreferredWidth(100); // Date
-        table.getColumnModel().getColumn(4).setPreferredWidth(300); // Description
+        table.getColumnModel().getColumn(1).setPreferredWidth(100); // Amount
+        table.getColumnModel().getColumn(2).setPreferredWidth(100); // Currency
+        table.getColumnModel().getColumn(3).setPreferredWidth(400); // Category
 
         var scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Transactions"));
@@ -518,16 +519,16 @@ public class MainWindow extends JFrame implements View {
             expensesLabel.setText(budget.expenses().toString());
             balanceLabel.setText(budget.balance().toString());
 
-            /*for (var transaction : budget.transactions()) {
+            var transactions = budget.stream().collect(Collectors.toList());
+            for (var transaction : transactions) {
                 Object[] rowData = {
-                    transaction.type().toString(),
-                    transaction.category(),
-                    String.format("%s %.2f", budget.currency().symbol(), transaction.amount()),
-                    transaction.date().toString(),
-                    transaction.description()
+                    transaction.sign() >= 0 ? "Income" : "Expense",
+                    transaction.amount().toString(),
+                    transaction.amount().currency().toString(),
+                    transaction.category()
                 };
                 tableModel.addRow(rowData);
-            }*/
+            }
         } else {
             nameLabel.setText("-");
             currencyLabel.setText("-");
