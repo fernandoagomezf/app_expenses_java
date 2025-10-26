@@ -35,7 +35,7 @@ A desktop application for managing personal budgets, tracking income and expense
 
 Personal Expense Tracker (PET) is a desktop application designed to help users manage their personal finances through budget creation and transaction tracking. The application emphasizes clean code, maintainability, and domain-driven design principles.
 
-[![Application Screenshot](docs/images/screenshot.png)](docs/images/screenshot.png)
+[![Application Screenshot](docs/screenshot.png)](docs/screenshot.png)
 
 **Key Highlights:**
 - Currency support
