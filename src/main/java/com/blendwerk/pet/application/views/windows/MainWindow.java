@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -106,9 +107,32 @@ public class MainWindow extends JFrame implements View {
         if (fileName == null || fileName.isEmpty()) {
             throw new IllegalArgumentException("File name cannot be null or empty");
         }
-        var icon = new ImageIcon("C:\\Users\\SPARTANPC\\source\\repos\\expenses\\src\\main\\resources\\images\\" + fileName);
-        var scaled = icon.getImage().getScaledInstance(16, 16,  Image.SCALE_SMOOTH);
-        return new ImageIcon(scaled);
+        
+        Optional<ImageIcon> result = Optional.empty();
+        try {
+            var filePath = "src/main/resources/images/" + fileName;
+            var file = new java.io.File(filePath);
+            if (file.exists()) {
+                var icon = new ImageIcon(filePath);
+                var scaled = icon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+                result = Optional.of(new ImageIcon(scaled));
+            }
+        } catch (Exception e) {
+            result = Optional.empty();
+        }
+        
+        if (result.isEmpty()) {
+            var image = new BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            var g = image.getGraphics();
+            g.setColor(Color.LIGHT_GRAY);
+            g.fillRect(0, 0, 16, 16);
+            g.setColor(Color.DARK_GRAY);
+            g.drawRect(0, 0, 15, 15);
+            g.dispose();
+            result = Optional.of(new ImageIcon(image));
+        }
+
+        return result.get();
     }
     
     private JMenuBar createMenuBar() {
