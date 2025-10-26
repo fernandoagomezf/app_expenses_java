@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import com.blendwerk.pet.domain.budgeting.Budget;
 import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.repositories.BudgetRepository;
@@ -30,28 +30,20 @@ public class BudgetModel {
     public void removeListener(BudgetModelListener listener) {
         _listeners.remove(listener);
     }
-    
-    public Stream<BudgetSummary> getSummaries() {
-        Stream<BudgetSummary> results = null;
 
+    public List<Budget> getAllBudgets() {
+        List<Budget> result;
+        
         try {
-            results = _repository
-                .all()            
-                .map(budget -> new BudgetSummary(
-                    budget.id().toString(),
-                    budget.name(),
-                    budget.currency().toString(),
-                    budget.incomes().toString(),
-                    budget.expenses().toString(),
-                    budget.balance().toString()
-                ))
-                .sorted(Comparator.comparing(BudgetSummary::name, String.CASE_INSENSITIVE_ORDER));
+            result = _repository.all()
+                .sorted(Comparator.comparing(Budget::name))
+                .collect(Collectors.toList());
         } catch (Exception ex) {
-            notifyError("Could not retrieve budget summaries: " + ex.getMessage());
-            results = Stream.empty();
+            notifyError("Could not load budgets: " + ex.getMessage());
+            result = List.of();
         }
 
-        return results;
+        return result;
     }
 
     public Optional<Budget> getBudget(String budgetId) {

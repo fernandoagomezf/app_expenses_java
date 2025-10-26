@@ -1,7 +1,8 @@
-package com.blendwerk.pet.application.views;
+package com.blendwerk.pet.application.views.controls;
 
 import java.awt.Component;
 import java.awt.Image;
+
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -20,18 +21,9 @@ public class TreeCellRenderer extends DefaultTreeCellRenderer {
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);        
         
-        /* the icon files used in the tree were obtained from the following links:
-        * https://icons8.com/icon/eYaVJ9Nbqqbw/dollar-bag
-        * https://icons8.com/icon/6Rw34qscHREa/pay-date
-        * https://icons8.com/icon/rEUVwsj9R7SJ/withdrawal
-        * https://icons8.com/icon/oAMgq0s0bDXC/deposit
-        * https://icons8.com/icon/szZDhO4hzAsa/scales
-        * https://icons8.com/icon/U5tawfPekk34/get-cash
-        */
-        
         var node = (DefaultMutableTreeNode)value;
         var icon = switch (node.getLevel()) {
-            case 0 -> loadIcon("icons8-savings-48.png");
+            case 0 -> loadIcon("icons8-mortgage-48.png");
             case 1 -> loadIcon("icons8-budget-48.png");
             case 2 -> {
                 if (isIncomeNode(node)) {
@@ -78,3 +70,4 @@ public class TreeCellRenderer extends DefaultTreeCellRenderer {
         return false;
     }
 }
+

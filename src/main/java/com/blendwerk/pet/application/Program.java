@@ -2,8 +2,10 @@ package com.blendwerk.pet.application;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+
+import com.blendwerk.pet.application.controllers.MainController;
 import com.blendwerk.pet.application.models.BudgetModel;
-import com.blendwerk.pet.application.views.MainWindow;
+import com.blendwerk.pet.application.views.windows.MainWindow;
 import com.blendwerk.pet.infrastructure.repositories.FileBudgetRepository;
 import com.blendwerk.pet.infrastructure.services.FileStorage;
 import com.blendwerk.pet.infrastructure.services.FileStorageScanner;
@@ -30,10 +32,12 @@ public class Program {
         var summary = new FileStorageScanner();
         var repository = new FileBudgetRepository(cache, storage, summary);
         
-        var budgetModel = new BudgetModel(repository);
+        var model = new BudgetModel(repository);
+        var view = new MainWindow();
+        var controller = new MainController(model, view);
+        view.setVisible(true);
         
-        MainWindow mainWindow = new MainWindow(budgetModel);
-        mainWindow.setVisible(true);
+        controller.updateView();
         
         System.out.println("Personal Expense Tracker started with MVC architecture.");
     }

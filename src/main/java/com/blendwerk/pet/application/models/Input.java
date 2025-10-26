@@ -1,5 +1,5 @@
 package com.blendwerk.pet.application.models;
 
-public interface Validatable {
+public interface Input {
     ValidationResult validate();
 }
