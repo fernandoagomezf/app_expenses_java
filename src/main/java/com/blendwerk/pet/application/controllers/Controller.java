@@ -29,23 +29,25 @@ public class Controller implements ModelListener, ViewListener {
         updateView();
     }
 
+    public void onBudgetUpdated(Budget budget) {
+        var message = "Budget '" + budget.name() + "' updated successfully.";
+        _view.showSuccess(message);
+        updateView();
+    }
+
     public void onError(String message) {                
         _view.showError(message);
     }
     
-    public void createNewBudget() {
-        var input = _view.getNewBudget();
-        if (input.isPresent()) {
-            _model.createBudget(input.get());
-        }
-    }
-
     public void requestAbout() {
         _view.showAbout();
     }
 
     public void requestNewBudget() {
-        createNewBudget();
+        var input = _view.getNewBudget();
+        if (input.isPresent()) {
+            _model.createBudget(input.get());
+        }
         updateView();
     }
     
@@ -56,5 +58,17 @@ public class Controller implements ModelListener, ViewListener {
     public void requestSelectBudget(String budgetId) {
         _model.select(budgetId);
         updateView();
+    }
+
+    public void requestNewTransaction() {
+        var budget = _model.getSelectedBudget();
+        if (budget.isPresent()){
+            var input = _view.getNewTransaction();
+            if (input.isPresent()) {
+                _model.createTransaction(input.get());
+            }
+        } else {
+            _view.showError("No budget selected. Please select a budget first.");
+        }
     }
 }

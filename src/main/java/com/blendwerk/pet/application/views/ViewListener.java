@@ -4,4 +4,5 @@ public interface ViewListener {
     void requestAbout();
     void requestNewBudget();
     void requestSelectBudget(String budgetId);
+    void requestNewTransaction();
 }

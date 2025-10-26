@@ -9,60 +9,64 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
 import com.blendwerk.pet.domain.budgeting.Currency;
 
 public class BudgetDialog {
     private final JFrame _parent;
-        private JTextField _budgetNameField;
-        private JComboBox<Currency> _currencyComboBox;
-        private boolean _confirmed;
-        
-        public BudgetDialog(JFrame parent) {
-            _parent = parent;
-            _confirmed = false;
+    private JTextField _budgetNameField;
+    private JComboBox<Currency> _currencyComboBox;
+    private boolean _confirmed;
+    
+    public BudgetDialog(JFrame parent) {
+        if (parent == null) {
+            throw new IllegalArgumentException("Parent frame cannot be null");
         }
+        _parent = parent;
+        _confirmed = false;
+    }
+    
+    public void show() {
+        _budgetNameField = new JTextField(20);
+        _currencyComboBox = new JComboBox<>(Currency.values());
+        _currencyComboBox.setSelectedItem(Currency.MXN); 
         
-        public void show() {
-            _budgetNameField = new JTextField(20);
-            _currencyComboBox = new JComboBox<>(Currency.values());
-            _currencyComboBox.setSelectedItem(Currency.MXN); 
-            
-            JPanel panel = new JPanel(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);
-            
-            gbc.gridx = 0; gbc.gridy = 0;
-            panel.add(new JLabel("Budget Name:"), gbc);
-            gbc.gridx = 1;
-            panel.add(_budgetNameField, gbc);
-            
-            gbc.gridx = 0; gbc.gridy = 1;
-            panel.add(new JLabel("Currency:"), gbc);
-            gbc.gridx = 1;
-            panel.add(_currencyComboBox, gbc);
-            
-            int result = JOptionPane.showConfirmDialog(
-                _parent,
-                panel,
-                "Create New Budget",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-            );
-            
-            _confirmed = (result == JOptionPane.OK_OPTION) && !getBudgetName().trim().isEmpty();
-        }
+        var panel = new JPanel(new GridBagLayout());
+        var gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
         
-        public boolean isConfirmed() {
-            return _confirmed;
-        }
+        gbc.gridx = 0; 
+        gbc.gridy = 0;
+        panel.add(new JLabel("Budget Name:"), gbc);
+        gbc.gridx = 1;
+        panel.add(_budgetNameField, gbc);
         
-        public String getBudgetName() {
-            return _budgetNameField != null ? _budgetNameField.getText().trim() : "";
-        }
+        gbc.gridx = 0; 
+        gbc.gridy = 1;
+        panel.add(new JLabel("Currency:"), gbc);
+        gbc.gridx = 1;
+        panel.add(_currencyComboBox, gbc);
         
-        public String getCurrency() {
-            Currency selected = (Currency) _currencyComboBox.getSelectedItem();
-            return selected != null ? selected.toString() : Currency.MXN.toString();
-        }
+        int result = JOptionPane.showConfirmDialog(
+            _parent,
+            panel,
+            "Create New Budget",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+        );
+        
+        _confirmed = (result == JOptionPane.OK_OPTION);
+    }
+    
+    public boolean isConfirmed() {
+        return _confirmed;
+    }
+    
+    public String getBudgetName() {
+        return _budgetNameField != null ? _budgetNameField.getText().trim() : "";
+    }
+    
+    public String getCurrency() {
+        Currency selected = (Currency) _currencyComboBox.getSelectedItem();
+        return selected != null ? selected.toString() : Currency.MXN.toString();
+    }
 }

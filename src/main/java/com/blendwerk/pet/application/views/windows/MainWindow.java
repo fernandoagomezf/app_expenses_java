@@ -16,7 +16,6 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -42,7 +41,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import com.blendwerk.pet.application.models.Model;
-import com.blendwerk.pet.application.models.CreateBudgetInput;
+import com.blendwerk.pet.application.models.TransactionInput;
+import com.blendwerk.pet.application.models.BudgetInput;
 import com.blendwerk.pet.application.views.View;
 import com.blendwerk.pet.application.views.ViewListener;
 import com.blendwerk.pet.application.views.controls.TreeCellRenderer;
@@ -127,7 +127,12 @@ public class MainWindow extends JFrame implements View {
         fileMenu.add(exitItem);
         
         JMenu editMenu = new JMenu("Edit");
-        editMenu.setMnemonic(KeyEvent.VK_E);        
+        editMenu.setMnemonic(KeyEvent.VK_E); 
+            JMenuItem addTransactionItem = new JMenuItem("Add Transaction");
+            addTransactionItem.setMnemonic(KeyEvent.VK_A);
+            addTransactionItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
+            addTransactionItem.addActionListener(e -> onAddTransaction());
+        editMenu.add(addTransactionItem);
         
         JMenu viewMenu = new JMenu("View");
         viewMenu.setMnemonic(KeyEvent.VK_V);              
@@ -402,6 +407,12 @@ public class MainWindow extends JFrame implements View {
         }
     }
 
+    private void onAddTransaction() {
+        for (var listener : _listeners) {
+            listener.requestNewTransaction();
+        }
+    }
+
     private void onSelectBudget(Budget budget) {
         if (budget == null) {
             throw new IllegalArgumentException("Budget cannot be null");
@@ -435,16 +446,32 @@ public class MainWindow extends JFrame implements View {
         );
     }
 
-    public Optional<CreateBudgetInput> getNewBudget() {
+    public Optional<BudgetInput> getNewBudget() {
         var dialog = new BudgetDialog(this);
         dialog.show();
         
-        Optional<CreateBudgetInput> result = Optional.empty();
+        Optional<BudgetInput> result = Optional.empty();
         if (dialog.isConfirmed()) {
             String budgetName = dialog.getBudgetName();
             String currency = dialog.getCurrency();
             
-            var input = new CreateBudgetInput(budgetName, currency);
+            var input = new BudgetInput(budgetName, currency);
+            result = Optional.of(input);
+        }
+
+        return result;
+    }
+
+    public Optional<TransactionInput> getNewTransaction() {
+        var dialog = new TransactionDialog(this);
+        dialog.show();
+        
+        Optional<TransactionInput> result = Optional.empty();
+        if (dialog.isConfirmed()) {
+            // Collect transaction data from dialog (not implemented yet)
+            // var input = new TransactionInput(...);
+            // result = Optional.of(input);
+            var input = new TransactionInput("42.00", "MXN", "OTHER", "Income");
             result = Optional.of(input);
         }
 

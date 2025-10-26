@@ -2,7 +2,7 @@ package com.blendwerk.pet.application.models;
 
 import com.blendwerk.pet.domain.budgeting.Currency;
 
-public record CreateBudgetInput(String name, String currency) implements Input {
+public record BudgetInput(String name, String currency) implements Input {
     public ValidationResult validate() {
         if (name() == null || name().isBlank()) {
             return ValidationResult.invalid( "Budget name cannot be empty.");

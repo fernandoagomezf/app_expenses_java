@@ -1,12 +1,13 @@
 package com.blendwerk.pet.application.views;
 
 import java.util.Optional;
-
 import com.blendwerk.pet.application.models.Model;
-import com.blendwerk.pet.application.models.CreateBudgetInput;
+import com.blendwerk.pet.application.models.BudgetInput;
+import com.blendwerk.pet.application.models.TransactionInput;
 
 public interface View {
-    Optional<CreateBudgetInput> getNewBudget();
+    Optional<BudgetInput> getNewBudget();
+    Optional<TransactionInput> getNewTransaction();
     void showError(String message);
     void showSuccess(String message);
     void showAbout();

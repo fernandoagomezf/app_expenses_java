@@ -6,6 +6,11 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import com.blendwerk.pet.domain.budgeting.Budget;
+import com.blendwerk.pet.domain.budgeting.Currency;
+import com.blendwerk.pet.domain.budgeting.ExpenseCategory;
+import com.blendwerk.pet.domain.budgeting.IncomeCategory;
+import com.blendwerk.pet.domain.budgeting.Money;
+import com.blendwerk.pet.domain.budgeting.Transaction;
 import com.blendwerk.pet.domain.core.Identifier;
 import com.blendwerk.pet.infrastructure.repositories.BudgetRepository;
 
@@ -63,7 +68,7 @@ public class Model {
         return result;
     }
 
-    public Optional<Budget> createBudget(CreateBudgetInput input) {
+    public Optional<Budget> createBudget(BudgetInput input) {
         if (input == null) {
             throw new IllegalArgumentException("Input cannot be null.");
         }
@@ -85,10 +90,53 @@ public class Model {
         
         return result;
     }
+
+    public Optional<Transaction> createTransaction(TransactionInput input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input cannot be null.");
+        }
+
+        Optional<Transaction> result = Optional.empty();
+        try {            
+            var validation = input.validate();
+            if (validation.isValid()) {
+                Budget budget = _selected.orElseThrow(() -> new IllegalStateException("No budget selected."));
+                var currency = Currency.valueOf(input.currency());
+                var amount = Money.of(input.amount(), currency);
+                
+                if (input.type().equals("Expense")) {
+                    var category = ExpenseCategory.valueOf(input.category());
+                    var expense = budget.debit(amount, category);
+                    result = Optional.of(expense);
+                } else if (input.type().equals("Income")) {
+                    var category = IncomeCategory.valueOf(input.category());
+                    var income = budget.credit(amount, category);
+                    result = Optional.of(income);
+                } else {
+                    notifyError("Could not create transaction: Unknown transaction type '" + input.type() + "'.");
+                }
+
+                _repository.save(budget);
+                notifyBudgetUpdated(budget);           
+            } else {
+                notifyError("Could not create transaction: " + validation.errorMessage());
+            }
+        } catch (Exception ex) {
+            notifyError("Could not create transaction: " + ex.getMessage());
+        }
+        
+        return result;
+    }
     
     private void notifyBudgetCreated(Budget budget) {
         for (ModelListener listener : _listeners) {
             listener.onBudgetCreated(budget);
+        }
+    }
+
+    private void notifyBudgetUpdated(Budget budget) {
+        for (ModelListener listener : _listeners) {
+            listener.onBudgetUpdated(budget);
         }
     }
     
