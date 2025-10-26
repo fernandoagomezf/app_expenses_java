@@ -267,7 +267,6 @@ public class MainWindow extends JFrame implements View {
         var transactionAmountLabel = new JLabel("Amount: -");        
         var transactionCurrencyLabel = new JLabel("Currency: -");
         var transactionIdLabel = new JLabel("ID: -");
-        var editButton = new JButton("Edit Transaction");
         var deleteButton = new JButton("Delete Transaction");
         
         transactionTypeLabel.setName("TransactionTypeLabel");
@@ -279,9 +278,12 @@ public class MainWindow extends JFrame implements View {
         transactionIdLabel.setFont(transactionIdLabel.getFont().deriveFont(Font.PLAIN, 10f));
         transactionIdLabel.setForeground(Color.GRAY);
         transactionTypeLabel.setFont(transactionTypeLabel.getFont().deriveFont(Font.BOLD, 16f));        
-        editButton.setEnabled(false);
+        
         deleteButton.setEnabled(false);
+        deleteButton.setName("DeleteTransactionButton");
         deleteButton.setForeground(new Color(128, 0, 0));
+        deleteButton.setIcon(loadIcon("icons8-delete-dollar-48.png"));
+        deleteButton.addActionListener(e -> onDeleteTransaction());
         
         var headerPanel = new JPanel(new BorderLayout());
 
@@ -318,7 +320,6 @@ public class MainWindow extends JFrame implements View {
         
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         actionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));        
-        actionsPanel.add(editButton);
         actionsPanel.add(deleteButton);
         
         panel.add(actionsPanel, BorderLayout.SOUTH);
@@ -501,6 +502,7 @@ public class MainWindow extends JFrame implements View {
         var categoryLabel = (JLabel) findComponent(_detailsPanel, "TransactionCategoryLabel").orElse(null);
         var amountLabel = (JLabel) findComponent(_detailsPanel, "TransactionAmountLabel").orElse(null);
         var currencyLabel = (JLabel) findComponent(_detailsPanel, "TransactionCurrencyLabel").orElse(null);
+        var deleteButton = (JButton) findComponent(_detailsPanel, "DeleteTransactionButton").orElse(null);
         
         if (typeLabel != null) {
             typeLabel.setText(type);
@@ -514,7 +516,9 @@ public class MainWindow extends JFrame implements View {
         if (currencyLabel != null) {
             currencyLabel.setText(currency);
         }
-
+        if (deleteButton != null) {
+            deleteButton.setEnabled(true);
+        }
     }
     
     private void clearTransactionDetails() {
@@ -522,6 +526,7 @@ public class MainWindow extends JFrame implements View {
         var categoryLabel = (JLabel) findComponent(_detailsPanel, "TransactionCategoryLabel").orElse(null);
         var amountLabel = (JLabel) findComponent(_detailsPanel, "TransactionAmountLabel").orElse(null);
         var currencyLabel = (JLabel) findComponent(_detailsPanel, "TransactionCurrencyLabel").orElse(null);
+        var deleteButton = (JButton) findComponent(_detailsPanel, "DeleteTransactionButton").orElse(null);
         
         if (typeLabel != null) {
             typeLabel.setText("No Transaction Selected");
@@ -534,6 +539,9 @@ public class MainWindow extends JFrame implements View {
         }
         if (currencyLabel != null) {
             currencyLabel.setText("Currency: -");
+        }
+        if (deleteButton != null) {
+            deleteButton.setEnabled(false);
         }
     }
 
