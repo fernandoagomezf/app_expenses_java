@@ -37,6 +37,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -47,6 +48,7 @@ import com.blendwerk.pet.application.models.TransactionInput;
 import com.blendwerk.pet.application.models.BudgetInput;
 import com.blendwerk.pet.application.views.View;
 import com.blendwerk.pet.application.views.ViewListener;
+import com.blendwerk.pet.application.views.controls.TransactionTableCellRenderer;
 import com.blendwerk.pet.application.views.controls.TreeCellRenderer;
 import com.blendwerk.pet.domain.budgeting.Budget;
 
@@ -528,6 +530,13 @@ public class MainWindow extends JFrame implements View {
                     transaction.category()
                 };
                 tableModel.addRow(rowData);
+            }
+            
+            var cellRenderer = new TransactionTableCellRenderer();
+            for (int i = 0; i < table.getColumnCount(); i++) {
+                table.getColumnModel()
+                     .getColumn(i)
+                     .setCellRenderer(cellRenderer);
             }
         } else {
             nameLabel.setText("-");
