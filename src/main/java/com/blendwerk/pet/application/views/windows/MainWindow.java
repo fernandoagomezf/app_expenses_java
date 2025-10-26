@@ -119,7 +119,7 @@ public class MainWindow extends JFrame implements View {
             JMenuItem newBudgetItem = new JMenuItem("New Budget");
             newBudgetItem.setMnemonic(KeyEvent.VK_N);
             newBudgetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-            newBudgetItem.setIcon(loadIcon("icons8-add-48.png"));
+            newBudgetItem.setIcon(loadIcon("icons8-budget-48.png"));
             newBudgetItem.addActionListener(e -> onCreateNewBudget());                    
             JMenuItem exitItem = new JMenuItem("Exit");
             exitItem.setMnemonic(KeyEvent.VK_X);
@@ -158,7 +158,7 @@ public class MainWindow extends JFrame implements View {
         JToolBar toolBar = new JToolBar("Main Toolbar");
         toolBar.setFloatable(false);
         
-        JButton newBudgetButton = new JButton(loadIcon("icons8-add-48.png"));
+        JButton newBudgetButton = new JButton(loadIcon("icons8-budget-48.png"));
         newBudgetButton.setToolTipText("Create new budget");
         newBudgetButton.addActionListener(e -> onCreateNewBudget());  
         JButton addTransactionButton = new JButton(loadIcon("icons8-transaction-48.png"));
