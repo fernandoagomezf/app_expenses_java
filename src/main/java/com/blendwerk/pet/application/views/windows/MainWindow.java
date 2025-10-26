@@ -13,7 +13,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -134,6 +133,7 @@ public class MainWindow extends JFrame implements View {
             JMenuItem addTransactionItem = new JMenuItem("Add Transaction");
             addTransactionItem.setMnemonic(KeyEvent.VK_A);
             addTransactionItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
+            addTransactionItem.setIcon(loadIcon("icons8-transaction-48.png"));
             addTransactionItem.addActionListener(e -> onAddTransaction());
         editMenu.add(addTransactionItem);
         
@@ -158,12 +158,16 @@ public class MainWindow extends JFrame implements View {
         JToolBar toolBar = new JToolBar("Main Toolbar");
         toolBar.setFloatable(false);
         
-        JButton newButton = new JButton(loadIcon("icons8-add-48.png"));
-        newButton.setToolTipText("Create new budget");
-        newButton.addActionListener(e -> onCreateNewBudget());        
+        JButton newBudgetButton = new JButton(loadIcon("icons8-add-48.png"));
+        newBudgetButton.setToolTipText("Create new budget");
+        newBudgetButton.addActionListener(e -> onCreateNewBudget());  
+        JButton addTransactionButton = new JButton(loadIcon("icons8-transaction-48.png"));
+        addTransactionButton.setToolTipText("Add new transaction");
+        addTransactionButton.addActionListener(e -> onAddTransaction());      
         
-        toolBar.add(newButton);
+        toolBar.add(newBudgetButton);
         toolBar.addSeparator();
+        toolBar.add(addTransactionButton);
         
         return toolBar;
     }
