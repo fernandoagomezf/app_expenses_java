@@ -114,6 +114,18 @@ public final class Budget implements Entity {
         return expense;   
     }
 
+    public void remove(Identifier id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null.");
+        }
+
+        if (_transactions.containsKey(id)) {
+            _transactions.remove(id);
+            invalidate();
+            ensure();
+        } 
+    }
+
     public Optional<Transaction> find(Identifier id){
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null.");

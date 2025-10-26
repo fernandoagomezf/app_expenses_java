@@ -93,6 +93,32 @@ public class Model {
         return result;
     }
 
+    public void deleteTransaction() {
+        
+        try {
+            Budget budget = _selectedBudget.orElseThrow(() -> new IllegalStateException("No budget selected."));
+            Transaction transaction = _selectedTransaction.orElseThrow(() -> new IllegalStateException("No transaction selected."));            
+            budget.remove(transaction.id());            
+            _repository.save(budget);
+            _selectedTransaction = Optional.empty();
+            notifyBudgetUpdated(budget);            
+        } catch (Exception ex) {
+            notifyError("Could not delete transaction: " + ex.getMessage());
+        }
+    }
+
+    public void deleteBudget() {
+        try {
+            Budget budget = _selectedBudget.orElseThrow(() -> new IllegalStateException("No budget selected."));
+            _repository.delete(budget.id());    
+            _selectedBudget = Optional.empty();
+            _selectedTransaction = Optional.empty();
+            notifyBudgetUpdated(null);
+        } catch (Exception ex) {
+            notifyError("Could not delete budget: " + ex.getMessage());
+        }
+    }
+
     public Optional<Transaction> createTransaction(TransactionInput input) {
         if (input == null) {
             throw new IllegalArgumentException("Input cannot be null.");
