@@ -123,6 +123,7 @@ public class MainWindow extends JFrame implements View {
             newBudgetItem.addActionListener(e -> onCreateNewBudget());                    
             JMenuItem exitItem = new JMenuItem("Exit");
             exitItem.setMnemonic(KeyEvent.VK_X);
+            exitItem.setIcon(loadIcon("icons8-close-48.png"));
             exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(newBudgetItem);
         fileMenu.addSeparator();        
