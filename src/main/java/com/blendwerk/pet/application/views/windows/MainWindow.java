@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -433,6 +434,7 @@ public class MainWindow extends JFrame implements View {
             "Error",
             JOptionPane.ERROR_MESSAGE
         );
+        
     }
 
     public void showSuccess(String message) {
@@ -518,6 +520,15 @@ public class MainWindow extends JFrame implements View {
             incomeLabel.setText(budget.incomes().toString());
             expensesLabel.setText(budget.expenses().toString());
             balanceLabel.setText(budget.balance().toString());
+            
+            var balance = budget.balance();
+            if (balance.isPositive()) {
+                balanceLabel.setForeground(new Color(0, 150, 0)); 
+            } else if (balance.isNegative()) {
+                balanceLabel.setForeground(new Color(200, 0, 0));
+            } else {
+                balanceLabel.setForeground(Color.BLACK);
+            }
 
             var transactions = budget.stream().collect(Collectors.toList());
             for (var transaction : transactions) {
@@ -542,6 +553,7 @@ public class MainWindow extends JFrame implements View {
             incomeLabel.setText("-");
             expensesLabel.setText("-");
             balanceLabel.setText(String.format("Balance: -"));
+            balanceLabel.setForeground(Color.BLACK); // Reset to black when no budget selected
         }
     }
     

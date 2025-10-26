@@ -25,6 +25,14 @@ public record Money(BigDecimal value, Currency currency) implements ValueObject<
             value = value.setScale(INTERNAL_SCALE, RoundingMode.HALF_UP);
         }
     }
+
+    public boolean isPositive() {
+        return value().compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    public boolean isNegative() {
+        return value().compareTo(BigDecimal.ZERO) < 0;
+    }
     
     public Money add(Money other) {
         if (!currency.equals(other.currency)) {
