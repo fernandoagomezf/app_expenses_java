@@ -451,7 +451,6 @@ public class MainWindow extends JFrame implements View {
     }
     
     private void onSelectTransaction(String type, String amount, String currency, String category) {
-        // Update the details panel with the selected transaction info
         var typeLabel = (JLabel) findComponent(_detailsPanel, "TransactionTypeLabel").orElse(null);
         var categoryLabel = (JLabel) findComponent(_detailsPanel, "TransactionCategoryLabel").orElse(null);
         var amountLabel = (JLabel) findComponent(_detailsPanel, "TransactionAmountLabel").orElse(null);
@@ -469,6 +468,9 @@ public class MainWindow extends JFrame implements View {
         if (currencyLabel != null) {
             currencyLabel.setText(currency);
         }
+
+        var msg = type + " - " + amount + " " + currency;
+        showSuccess(msg, false);
     }
     
     private void clearTransactionDetails() {
